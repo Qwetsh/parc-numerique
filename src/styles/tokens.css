@@ -1,0 +1,147 @@
+/* ============================================================
+   PARC NUMÉRIQUE — Design tokens
+   Réutilisables dans une app React (CSS variables).
+   Direction : ardoise + bleu profond, états sémantiques.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ---------- Couleur de marque (accent) ---------- */
+  --brand-50:  #eef3fd;
+  --brand-100: #dde7fb;
+  --brand-200: #bcd0f6;
+  --brand-300: #8fb0ef;
+  --brand-500: #2e5fd6;
+  --brand-600: #2350c0;   /* action principale */
+  --brand-700: #1c3f9c;   /* survol / profond */
+  --brand-800: #18347d;
+
+  /* ---------- Neutres (ardoise) ---------- */
+  --ink-950: #0b1220;
+  --ink-900: #0f172a;   /* titres */
+  --ink-700: #334155;   /* texte courant fort */
+  --ink-600: #475569;
+  --ink-500: #64748b;   /* texte secondaire */
+  --ink-400: #94a3b8;   /* texte tertiaire / placeholder */
+  --ink-300: #cbd5e1;
+  --ink-200: #e2e8f0;
+  --ink-150: #e9edf2;
+  --ink-100: #eef1f5;
+  --ink-50:  #f6f8fb;
+
+  --bg:       #f4f6f9;  /* fond application */
+  --surface:  #ffffff;  /* cartes / panneaux */
+  --surface-2:#fbfcfe;  /* fond doux secondaire */
+  --line:     #e7ebf1;  /* filets discrets */
+  --line-strong: #d8dee7;
+
+  /* ---------- États sémantiques ----------
+     Chaque état = fond (tint), trait (line), texte (ink), plein (solid).
+     Toujours doublé par texte/icône, jamais couleur seule. */
+
+  /* Fonctionnel — vert */
+  --ok-tint:  #e7f6ec;
+  --ok-line:  #b7e3c4;
+  --ok-solid: #18924c;
+  --ok-ink:   #11703a;
+  --ok-top:   #e3f4e9;   /* teinte toit isométrique */
+
+  /* Vétuste — ambre */
+  --warn-tint:  #fdf1de;
+  --warn-line:  #f3d49a;
+  --warn-solid: #c9790a;
+  --warn-ink:   #8f5406;
+  --warn-top:   #fbeed6;
+
+  /* En panne — rouge */
+  --bad-tint:  #fce9e7;
+  --bad-line:  #f4c0ba;
+  --bad-solid: #d23b2c;
+  --bad-ink:   #a32a1e;
+  --bad-top:   #fae3e0;
+
+  /* Réformé — gris ardoise */
+  --gone-tint:  #eef1f5;
+  --gone-line:  #d3dae3;
+  --gone-solid: #5b6b7f;
+  --gone-ink:   #44515f;
+  --gone-top:   #eaedf2;
+
+  /* Salle sans équipement (« X ») — neutre clair, distinct */
+  --none-tint:  #f3f5f8;
+  --none-line:  #dfe5ec;
+  --none-ink:   #8a97a8;
+
+  /* ---------- Typographie ---------- */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* échelle (desktop) */
+  --fs-display: 52px;  /* grands chiffres indicateurs */
+  --fs-h1: 27px;
+  --fs-h2: 19px;
+  --fs-h3: 16px;
+  --fs-body: 14.5px;
+  --fs-sm: 13px;
+  --fs-xs: 12px;
+  --fs-eyebrow: 11.5px;
+
+  --lh-tight: 1.08;
+  --lh-snug: 1.3;
+  --lh-body: 1.55;
+
+  /* ---------- Rayons ---------- */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* ---------- Ombres (légères, douces) ---------- */
+  --sh-xs: 0 1px 2px rgba(15,23,42,.05);
+  --sh-sm: 0 1px 2px rgba(15,23,42,.04), 0 2px 6px rgba(15,23,42,.05);
+  --sh-md: 0 1px 3px rgba(15,23,42,.04), 0 10px 24px -8px rgba(15,23,42,.12);
+  --sh-lg: 0 2px 6px rgba(15,23,42,.05), 0 22px 48px -16px rgba(15,23,42,.20);
+  --sh-pop: 0 4px 10px rgba(15,23,42,.07), 0 30px 60px -20px rgba(15,23,42,.28);
+  --ring: 0 0 0 3px rgba(35,80,192,.32);
+
+  /* ---------- Espacement (base 4) ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px;
+
+  /* ---------- Transitions ---------- */
+  --ease: cubic-bezier(.4, 0, .2, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --t-fast: 120ms;
+  --t: 200ms;
+  --t-slow: 360ms;
+
+  --sidebar-w: 248px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink-900);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root { min-height: 100vh; }
+
+.tnum { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+
+::selection { background: var(--brand-100); }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-xs);
+}

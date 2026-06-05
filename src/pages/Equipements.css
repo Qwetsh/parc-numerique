@@ -1,0 +1,34 @@
+.toolbar { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-5); }
+.toolbar .field { width: 320px; }
+.sel {
+  appearance: none; font-family: inherit; font-size: var(--fs-sm); font-weight: 500;
+  color: var(--ink-700); background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm); height: 38px; padding: 0 34px 0 13px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.sel:focus { outline: none; border-color: var(--brand-500); box-shadow: var(--ring); }
+.toggle-chip {
+  display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: var(--surface);
+  font-size: var(--fs-sm); font-weight: 550; color: var(--ink-600); cursor: pointer;
+  transition: all var(--t-fast) var(--ease); font-family: inherit;
+}
+.toggle-chip:hover { border-color: var(--ink-300); }
+.toggle-chip[aria-pressed="true"] { background: var(--warn-tint); border-color: var(--warn-line); color: var(--warn-ink); }
+.toggle-chip .tk { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--ink-300); display: grid; place-items: center; }
+.toggle-chip[aria-pressed="true"] .tk { background: var(--warn-solid); border-color: var(--warn-solid); }
+.toggle-chip .tk svg { opacity: 0; color: #fff; }
+.toggle-chip[aria-pressed="true"] .tk svg { opacity: 1; }
+.toolbar .count { margin-left: auto; font-size: var(--fs-sm); color: var(--ink-500); }
+.toolbar .count b { color: var(--ink-900); font-weight: 600; }
+
+.type-cell { display: flex; align-items: center; gap: 9px; }
+.type-ic { width: 30px; height: 30px; border-radius: 8px; background: var(--brand-50); color: var(--brand-600); display: grid; place-items: center; flex: none; }
+.age-cell { display: flex; align-items: baseline; gap: 7px; }
+.age-cell .yr { font-variant-numeric: tabular-nums; }
+.age-cell .ag { font-size: var(--fs-xs); color: var(--ink-400); }
+.age-cell .ag.old { color: var(--warn-ink); font-weight: 600; }
+.empty { padding: var(--sp-12); text-align: center; color: var(--ink-500); }
+table.tbl tbody tr.clickable { cursor: pointer; }

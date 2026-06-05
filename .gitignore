@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vite
+
+# Build info TypeScript
+*.tsbuildinfo
+
+# Outillage local (non lié à l'application)
+.claude/
+_bmad/
+_bmad-output/
+docs/
