@@ -17,7 +17,11 @@ const BAY = 2.45 // largeur de référence d'une travée
 const MAX_BAYS = 9 // longueur commune à tous les étages
 const U = MAX_BAYS * BAY // longueur utile (salles)
 
-export const TOTAL_X = MARGIN * 2 + SW * 2 + U
+// Largeur intérieure totale du bâtiment (rangée nord = pleine largeur ;
+// rangée sud = escaliers d'extrémité + salles + escalier central).
+const INNER = SW * 2 + U
+
+export const TOTAL_X = MARGIN * 2 + INNER
 export const TOTAL_Y = MARGIN * 2 + ROOM_D * 2 + CORR
 
 /** Demi-dimensions pour recentrer le bâtiment sur l'origine. */
@@ -61,81 +65,77 @@ function weight(s: Salle): number {
   return 1
 }
 
-/** Élément d'une rangée : soit une salle, soit un emplacement d'escalier. */
-type RowItem = { salle: Salle } | { stair: true; weight: number; label?: string }
-
-/** Construit la liste des solides (salles + escaliers) d'un étage, en coords monde centrées. */
+/** Construit la liste des solides (salles + escaliers) d'un étage, en coords monde centrées.
+ *
+ *  Modèle (d'après le plan 2D) :
+ *  - rangée NORD = salles uniquement, sur toute la largeur intérieure (201 … 215) ;
+ *  - rangée SUD  = cage d'escalier OUEST (coin SO) + salles + cage CENTRALE (RDC/R+1/R+2)
+ *    + salles + cage EST (coin SE). Les escaliers sont à des positions X fixes, identiques
+ *    à tous les étages (cohérence verticale d'un bâtiment réel). */
 export function buildFloor(etage: number): Solid[] {
   const salles = SALLES.filter((s) => s.etage === etage)
   const nord = salles.filter((s) => s.cote === 'nord').sort((a, b) => numOrder(a) - numOrder(b))
   const sud = salles.filter((s) => s.cote === 'sud').sort((a, b) => numOrder(a) - numOrder(b))
-  const x0Rooms = MARGIN + SW
   const sh = H * 0.92
-
-  const itemWeight = (it: RowItem) => ('salle' in it ? weight(it.salle) : it.weight)
-
-  function placeRow(items: RowItem[], z0: number): Solid[] {
-    const W = items.reduce((a, it) => a + itemWeight(it), 0)
-    let cx = x0Rooms
-    return items.map((it) => {
-      const w = (itemWeight(it) / W) * U
-      const x = cx + w / 2 - CX
-      const z = z0 + ROOM_D / 2 - CZ
-      cx += w
-      if ('salle' in it) {
-        const solid: RoomSolid = { kind: 'room', salle: it.salle, sante: santeSalle(it.salle), x, z, w, d: ROOM_D, h: H }
-        return solid
-      }
-      const solid: StairSolid = { kind: 'stair', label: it.label, x, z, w, d: ROOM_D, h: sh }
-      return solid
-    })
-  }
 
   const zNord = MARGIN
   const zSud = MARGIN + ROOM_D + CORR
 
-  const nordItems: RowItem[] = nord.map((s) => ({ salle: s }))
-  const sudItems: RowItem[] = sud.map((s) => ({ salle: s }))
+  const x0 = MARGIN // bord intérieur ouest
+  const xEnd = MARGIN + INNER // bord intérieur est
+  const center = (x0 + xEnd) / 2 // centre du bâtiment (escalier central)
 
-  // Escalier central — inséré au milieu de la rangée sud, en façade (visible),
-  // présent au RDC, R+1 et R+2 mais pas au R+3 (cf. plan 2D).
-  if (etage !== 3 && sudItems.length > 1) {
-    const mid = Math.floor(sudItems.length / 2)
-    sudItems.splice(mid, 0, { stair: true, weight: 0.85, label: 'Esc. C' })
+  // Place une liste de salles, réparties par poids sur l'intervalle X [xa, xb].
+  function placeRooms(list: Salle[], xa: number, xb: number, z0: number): RoomSolid[] {
+    const W = list.reduce((a, s) => a + weight(s), 0) || 1
+    const span = xb - xa
+    let cx = xa
+    return list.map((s) => {
+      const w = (weight(s) / W) * span
+      const solid: RoomSolid = {
+        kind: 'room', salle: s, sante: santeSalle(s),
+        x: cx + w / 2 - CX, z: z0 + ROOM_D / 2 - CZ, w, d: ROOM_D, h: H,
+      }
+      cx += w
+      return solid
+    })
   }
 
-  const solids: Solid[] = [...placeRow(nordItems, zNord), ...placeRow(sudItems, zSud)]
-
-  // Cages d'escalier d'extrémité (ouest / est), scindées nord/sud
-  const wX0 = MARGIN
-  const eX0 = MARGIN + SW + U
-  const zS0 = MARGIN + ROOM_D + CORR
-
-  const mkStair = (x0: number, z0: number, label?: string): StairSolid => ({
-    kind: 'stair',
-    label,
-    x: x0 + SW / 2 - CX,
-    z: z0 + ROOM_D / 2 - CZ,
-    w: SW,
-    d: ROOM_D,
-    h: sh,
+  const stairAt = (xa: number, xb: number, label?: string): StairSolid => ({
+    kind: 'stair', label,
+    x: (xa + xb) / 2 - CX, z: zSud + ROOM_D / 2 - CZ,
+    w: xb - xa, d: ROOM_D, h: sh,
   })
 
-  solids.push(mkStair(wX0, zNord))
-  solids.push(mkStair(wX0, zS0, 'Esc. O'))
-  solids.push(mkStair(eX0, zNord))
-  solids.push(mkStair(eX0, zS0, 'Esc. E'))
+  // Rangée nord : salles sur toute la largeur.
+  const solids: Solid[] = [...placeRooms(nord, x0, xEnd, zNord)]
+
+  // Rangée sud : escaliers d'extrémité (côté sud uniquement) + salles.
+  solids.push(stairAt(x0, x0 + SW, 'Esc. O'))
+  solids.push(stairAt(xEnd - SW, xEnd, 'Esc. E'))
+
+  if (etage !== 3) {
+    // escalier central (présent RDC/R+1/R+2) — coupe la rangée sud en deux segments
+    const cHalf = SW / 2
+    solids.push(stairAt(center - cHalf, center + cHalf, 'Esc. C'))
+    const k = Math.floor(sud.length / 2)
+    solids.push(...placeRooms(sud.slice(0, k), x0 + SW, center - cHalf, zSud))
+    solids.push(...placeRooms(sud.slice(k), center + cHalf, xEnd - SW, zSud))
+  } else {
+    // R+3 : pas d'escalier central, salles entre les deux cages d'extrémité
+    solids.push(...placeRooms(sud, x0 + SW, xEnd - SW, zSud))
+  }
 
   return solids
 }
 
-/** Bande de couloir (centre monde et tailles). */
+/** Bande de couloir (centre monde et tailles) — sur toute la largeur intérieure. */
 export function corridorRect() {
   const cz0 = MARGIN + ROOM_D
   return {
-    x: (MARGIN + SW + U / 2) - CX,
+    x: 0,
     z: cz0 + CORR / 2 - CZ,
-    w: U,
+    w: INNER,
     d: CORR,
   }
 }
