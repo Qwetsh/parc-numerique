@@ -1,5 +1,9 @@
 # Parc numérique — Collège Jean-Moulin
 
+[![Déploiement GitHub Pages](https://github.com/Qwetsh/parc-numerique/actions/workflows/deploy.yml/badge.svg)](https://github.com/Qwetsh/parc-numerique/actions/workflows/deploy.yml)
+
+> **▶ Démo en ligne : https://qwetsh.github.io/parc-numerique/**
+
 Outil web d'inventaire et de pilotage du parc numérique d'un collège, destiné au
 référent numérique. Interface moderne, claire et spacieuse, avec un fil conducteur
 d'**états sémantiques** (vert = fonctionnel, ambre = vétuste, rouge = en panne,
@@ -43,6 +47,24 @@ src/
   college3d/             Moteur 3D : geometry (layout), Building3D (scène), Room3D, Stair3D,
                          RoomPanel, FloorSwitcher, Legend, shades (teintes par état)
 ```
+
+## Déploiement
+
+Le site est déployé automatiquement sur **GitHub Pages** via GitHub Actions
+(`.github/workflows/deploy.yml`) : à chaque `git push` sur `main`, l'app est buildée
+puis publiée sur https://qwetsh.github.io/parc-numerique/.
+
+Détails techniques (projet servi sous un sous-chemin `/parc-numerique/`) :
+
+- `base` Vite réglé sur `/parc-numerique/` **en build uniquement** (la racine `/` reste
+  utilisée en développement).
+- `BrowserRouter` configuré avec `basename={import.meta.env.BASE_URL}`.
+- Routage SPA géré sur Pages via `public/404.html` (encode l'URL profonde et redirige)
+  + un script de restauration dans `index.html` — les liens directs et le rafraîchissement
+  fonctionnent avec des URLs propres.
+
+> Si le dépôt est renommé, adapter `base` dans `vite.config.ts` et `pathSegmentsToKeep`
+> dans `public/404.html`.
 
 ## Notes
 
