@@ -32,6 +32,9 @@ export interface Salle {
   cote: Cote
   wifi: WifiKey
   equip: EquipGroupe[]
+  /** Largeur relative de la salle dans la maquette 3D (1 = salle standard).
+   *  Permet de coller aux proportions réelles du plan 2D. */
+  poids?: number
 }
 
 export interface Equipement {
@@ -56,35 +59,39 @@ export const ETATS: Record<EtatKey, EtatDef> = {
 
 // ---- Définition des salles (R+1 détaillé, autres étages plus légers) ----
 const SALLES: Salle[] = [
-  /* ---------------- 1er étage (R+1) — détaillé ---------------- */
-  { etage: 1, num: '201', nom: 'Salle 201', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
+  /* ---------------- 1er étage (R+1) — détaillé, fidèle au plan 2D ----------------
+     Sur le plan, certaines salles portent deux numéros mais ne forment qu'UNE pièce :
+     204+206 = le CDI, 207+209 = « poste 7 », 212+214 = « postes 74 à 77 ».
+     Le champ `poids` reflète la largeur réelle de chaque salle. */
+
+  // -- Rangée nord --
+  { etage: 1, num: '201', nom: 'Salle 201', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 1.15,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2020, etat: 'fonctionnel', n: 1 } ] },
-  { etage: 1, num: '203', nom: 'Salle 203', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', equip: [] },
-  { etage: 1, num: '205', nom: 'Salle 205', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne',
+  { etage: 1, num: '203', nom: 'Salle 203', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', poids: 0.75, equip: [] },
+  { etage: 1, num: '205', nom: 'Salle 205', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', poids: 1.0,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 7010', annee: 2014, etat: 'vetuste', n: 1 } ] },
-  { etage: 1, num: '207', nom: 'Salle 207', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
-    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
-  { etage: 1, num: '209', nom: 'Salle 209', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
-    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2020, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'NEC M300W', annee: 2013, etat: 'vetuste', n: 1 } ] },
-  { etage: 1, num: '211', nom: 'Salle 211', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
+  // 207 + 209 = une seule salle sur le plan
+  { etage: 1, num: '207', nom: 'Salle 207', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 2.0,
+    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2020, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'NEC M300W', annee: 2013, etat: 'vetuste', n: 1 } ] },
+  { etage: 1, num: '211', nom: 'Salle 211', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 1.2,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
-  { etage: 1, num: '213', nom: 'Salle 213', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', equip: [] },
-  { etage: 1, num: '215', nom: 'Salle 215', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
+  { etage: 1, num: '213', nom: 'Salle 213', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', poids: 0.55, equip: [] },
+  { etage: 1, num: '215', nom: 'Salle 215', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 1.45,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2022, etat: 'fonctionnel', n: 2 } ] },
 
-  { etage: 1, num: 'SDP', nom: 'Salle des profs', type: 'Salle des professeurs', cote: 'sud', wifi: 'bonne',
+  // -- Rangée sud --
+  { etage: 1, num: 'SDP', nom: 'Salle des profs', type: 'Salle des professeurs', cote: 'sud', wifi: 'bonne', poids: 1.25,
     equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 3 } ] },
-  { etage: 1, num: '204', nom: 'CDI', type: 'Centre de documentation', cote: 'sud', wifi: 'bonne',
-    equip: [ { type: 'PC portable', modele: 'HP ProBook 440 G9', annee: 2022, etat: 'fonctionnel', n: 4 }, { type: 'Visualiseur', modele: 'AverVision F50', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
-  { etage: 1, num: '206', nom: 'Salle 206', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne',
-    equip: [ { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2020, etat: 'fonctionnel', n: 1 } ] },
-  { etage: 1, num: '208', nom: 'Salle 208', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne',
+  // 204 + 206 = le CDI (une seule grande salle sur le plan)
+  { etage: 1, num: '204', nom: 'CDI', type: 'Centre de documentation', cote: 'sud', wifi: 'bonne', poids: 2.3,
+    equip: [ { type: 'PC portable', modele: 'HP ProBook 440 G9', annee: 2022, etat: 'fonctionnel', n: 4 }, { type: 'Visualiseur', modele: 'AverVision F50', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2020, etat: 'fonctionnel', n: 1 } ] },
+  { etage: 1, num: '208', nom: 'Salle 208', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', poids: 0.85,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 7010', annee: 2015, etat: 'panne', n: 1 } ] },
-  { etage: 1, num: '210', nom: 'Salle informatique', type: 'Salle informatique', cote: 'sud', wifi: 'bonne',
+  { etage: 1, num: '210', nom: 'Salle informatique', type: 'Salle informatique', cote: 'sud', wifi: 'bonne', poids: 2.0,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 13 }, { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'panne', n: 1 } ] },
-  { etage: 1, num: '212', nom: 'Salle 212', type: 'Salle de classe', cote: 'sud', wifi: 'faible',
+  // 212 + 214 = une seule salle sur le plan
+  { etage: 1, num: '212', nom: 'Salle 212', type: 'Salle de classe', cote: 'sud', wifi: 'faible', poids: 1.8,
     equip: [ { type: 'PC portable', modele: 'Dell Latitude 3540', annee: 2016, etat: 'vetuste', n: 1 } ] },
-  { etage: 1, num: '214', nom: 'Salle 214', type: 'Salle banalisée', cote: 'sud', wifi: 'faible', equip: [] },
 ]
 
 // ---- Génération légère des autres étages (RDC, R+2, R+3) ----

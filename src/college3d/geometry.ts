@@ -58,6 +58,8 @@ function numOrder(s: Salle): number {
 }
 
 function weight(s: Salle): number {
+  // Largeur explicite (plan 2D) prioritaire si fournie.
+  if (s.poids != null) return s.poids
   const n = nbPostes(s)
   if (s.type === 'Salle informatique' || s.type === 'Salle multimédia' || n >= 10) return 1.95
   if (s.type === 'Centre de documentation') return 1.55
