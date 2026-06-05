@@ -61,39 +61,52 @@ function weight(s: Salle): number {
   return 1
 }
 
+/** Élément d'une rangée : soit une salle, soit un emplacement d'escalier. */
+type RowItem = { salle: Salle } | { stair: true; weight: number; label?: string }
+
 /** Construit la liste des solides (salles + escaliers) d'un étage, en coords monde centrées. */
 export function buildFloor(etage: number): Solid[] {
   const salles = SALLES.filter((s) => s.etage === etage)
   const nord = salles.filter((s) => s.cote === 'nord').sort((a, b) => numOrder(a) - numOrder(b))
   const sud = salles.filter((s) => s.cote === 'sud').sort((a, b) => numOrder(a) - numOrder(b))
   const x0Rooms = MARGIN + SW
+  const sh = H * 0.92
 
-  function placeRow(list: Salle[], z0: number): RoomSolid[] {
-    const W = list.reduce((a, s) => a + weight(s), 0)
+  const itemWeight = (it: RowItem) => ('salle' in it ? weight(it.salle) : it.weight)
+
+  function placeRow(items: RowItem[], z0: number): Solid[] {
+    const W = items.reduce((a, it) => a + itemWeight(it), 0)
     let cx = x0Rooms
-    return list.map((s) => {
-      const w = (weight(s) / W) * U
-      const solid: RoomSolid = {
-        kind: 'room',
-        salle: s,
-        sante: santeSalle(s),
-        x: cx + w / 2 - CX,
-        z: z0 + ROOM_D / 2 - CZ,
-        w,
-        d: ROOM_D,
-        h: H,
-      }
+    return items.map((it) => {
+      const w = (itemWeight(it) / W) * U
+      const x = cx + w / 2 - CX
+      const z = z0 + ROOM_D / 2 - CZ
       cx += w
+      if ('salle' in it) {
+        const solid: RoomSolid = { kind: 'room', salle: it.salle, sante: santeSalle(it.salle), x, z, w, d: ROOM_D, h: H }
+        return solid
+      }
+      const solid: StairSolid = { kind: 'stair', label: it.label, x, z, w, d: ROOM_D, h: sh }
       return solid
     })
   }
 
   const zNord = MARGIN
   const zSud = MARGIN + ROOM_D + CORR
-  const solids: Solid[] = [...placeRow(nord, zNord), ...placeRow(sud, zSud)]
 
-  // Cages d'escalier (ouest / est), scindées nord/sud
-  const sh = H * 0.92
+  const nordItems: RowItem[] = nord.map((s) => ({ salle: s }))
+  const sudItems: RowItem[] = sud.map((s) => ({ salle: s }))
+
+  // Escalier central — inséré au milieu de la rangée sud, en façade (visible),
+  // présent au RDC, R+1 et R+2 mais pas au R+3 (cf. plan 2D).
+  if (etage !== 3 && sudItems.length > 1) {
+    const mid = Math.floor(sudItems.length / 2)
+    sudItems.splice(mid, 0, { stair: true, weight: 0.85, label: 'Esc. C' })
+  }
+
+  const solids: Solid[] = [...placeRow(nordItems, zNord), ...placeRow(sudItems, zSud)]
+
+  // Cages d'escalier d'extrémité (ouest / est), scindées nord/sud
   const wX0 = MARGIN
   const eX0 = MARGIN + SW + U
   const zS0 = MARGIN + ROOM_D + CORR
