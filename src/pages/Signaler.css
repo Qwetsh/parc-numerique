@@ -32,6 +32,27 @@
 .sg-equip-t { font-weight: 600; font-size: var(--fs-body); color: var(--ink-900); }
 .sg-equip-d { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 2px; }
 
+/* FAQ d'auto-dépannage */
+.sg-faq {
+  background: var(--brand-50); border: 1px solid var(--brand-100, #dbe6fb);
+  border-radius: var(--r-md); padding: 14px 14px 6px; margin-bottom: 18px;
+}
+.sg-faq-title { font-size: var(--fs-sm); font-weight: 600; color: var(--brand-700); margin-bottom: 8px; }
+.sg-faq-item { border-top: 1px solid var(--brand-100, #dbe6fb); }
+.sg-faq-item:first-of-type { border-top: none; }
+.sg-faq-item > summary {
+  cursor: pointer; list-style: none; padding: 10px 24px 10px 0; position: relative;
+  font-size: var(--fs-sm); font-weight: 550; color: var(--ink-800);
+}
+.sg-faq-item > summary::-webkit-details-marker { display: none; }
+.sg-faq-item > summary::after {
+  content: '+'; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; font-weight: 400; color: var(--brand-600); line-height: 1;
+}
+.sg-faq-item[open] > summary::after { content: '\2212'; } /* − */
+.sg-faq-item > p { margin: 0 0 12px; font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.5; }
+.sg-faq-foot { font-size: var(--fs-xs); color: var(--ink-500); margin: 8px 0 4px; text-align: center; }
+
 .sg-form { display: flex; flex-direction: column; gap: 16px; }
 .sg-field { display: flex; flex-direction: column; gap: 6px; }
 .sg-field > span { font-size: var(--fs-sm); font-weight: 550; color: var(--ink-700); }

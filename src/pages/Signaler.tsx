@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import { EquipIcon } from '../components/Icon'
 import { ETAGE_LABEL } from '../data/parc'
 import type { Equipement } from '../data/parc'
+import { faqFor } from '../data/faq'
 import { PROBLEMES, createSignalement, getEquipement } from '../lib/signalements'
 import './Signaler.css'
 
@@ -99,10 +100,23 @@ export function Signaler() {
               </div>
             </div>
 
+            {faqFor(equip.type).length > 0 && (
+              <div className="sg-faq">
+                <div className="sg-faq-title">💡 Avant de signaler — quelques vérifications</div>
+                {faqFor(equip.type).map((f) => (
+                  <details className="sg-faq-item" key={f.q}>
+                    <summary>{f.q}</summary>
+                    <p>{f.a}</p>
+                  </details>
+                ))}
+                <p className="sg-faq-foot">Ça n’a pas résolu le problème ? Signalez-le ci-dessous.</p>
+              </div>
+            )}
+
             <form className="sg-form" onSubmit={submit}>
               <label className="sg-field">
                 <span>Quel est le problème ?</span>
-                <select value={probleme} onChange={(e) => setProbleme(e.target.value)}>
+                <select value={probleme} autoComplete="off" onChange={(e) => setProbleme(e.target.value)}>
                   {PROBLEMES.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </label>
