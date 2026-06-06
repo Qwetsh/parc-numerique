@@ -17,10 +17,9 @@ import { buildFloor, corridorRect, PLINTH_RECT } from './geometry'
 import type { RoomSolid, Solid } from './geometry'
 import { CORR_FILL, PLINTH_SHADE, SHADE, STAIR_SHADE } from './shades'
 import { Badge } from '../components/Badge'
-import {
-  ETAGE_COURT, ETAGE_LABEL, SALLES, nbPostes, santeSalle,
-} from '../data/parc'
-import type { EquipGroupe, Salle } from '../data/parc'
+import { ETAGE_COURT, ETAGE_LABEL, SALLES } from '../data/parc'
+import type { Equipement, Salle } from '../data/parc'
+import { useParc } from '../data/parcStore'
 import './BuildingTower3D.css'
 
 const FLOORS = [0, 1, 2, 3]
@@ -51,7 +50,9 @@ interface TowerRoomProps {
 }
 
 function TowerRoom({ solid, selected, interactive, onSelect }: TowerRoomProps) {
-  const { salle, sante, x, z, w, d, h } = solid
+  const { salle, x, z, w, d, h } = solid
+  const { santeSalle } = useParc()
+  const sante = santeSalle(salle.etage, salle.num)
   const shade = SHADE[sante]
   const bw = Math.max(0.4, w - ROOM_GAP)
   const bd = Math.max(0.4, d - ROOM_GAP)
@@ -146,6 +147,7 @@ function FloorGroup({
   const group = useRef<THREE.Group>(null)
   const slabMat = useRef<THREE.MeshStandardMaterial>(null)
   const opacity = useRef(0)
+  const { santeSalle } = useParc()
 
   const isFocused = focused === etage
   const isDimmed = focused !== null && !isFocused
@@ -158,9 +160,9 @@ function FloorGroup({
   const summary = useMemo(() => {
     const salles = SALLES.filter((s) => s.etage === etage)
     const c: Record<string, number> = { panne: 0, vetuste: 0, fonctionnel: 0 }
-    salles.forEach((s) => { const k = santeSalle(s); if (k in c) c[k]++ })
+    salles.forEach((s) => { const k = santeSalle(s.etage, s.num); if (k in c) c[k]++ })
     return { total: salles.length, c }
-  }, [etage])
+  }, [etage, santeSalle])
 
   const baseY = floorBaseY(etage)
 
@@ -348,12 +350,14 @@ function Scene({ zoom, ...props }: SceneProps) {
 }
 
 /* ---------------- détail salle (overlay DOM) ---------------- */
-function groupEquip(equip: EquipGroupe[]): EquipGroupe[] {
-  const g: Record<string, EquipGroupe> = {}
-  equip.forEach((e) => {
+interface EquipGroup { type: string; modele: string; etat: string; n: number }
+/** Regroupe les équipements (en direct) par type+modèle+état avec un compteur. */
+function groupItems(items: Equipement[]): EquipGroup[] {
+  const g: Record<string, EquipGroup> = {}
+  items.forEach((e) => {
     const k = `${e.type}|${e.modele}|${e.etat}`
-    if (!g[k]) g[k] = { ...e, n: 0 }
-    g[k].n += e.n
+    if (!g[k]) g[k] = { type: e.type, modele: e.modele, etat: e.etat, n: 0 }
+    g[k].n += 1
   })
   return Object.values(g)
 }
@@ -363,9 +367,11 @@ const ETAT_DOT: Record<string, string> = {
 }
 
 function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
-  const sante = santeSalle(salle)
-  const groups = groupEquip(salle.equip)
-  const total = nbPostes(salle)
+  const { equipOf, santeSalle } = useParc()
+  const items = equipOf(salle.etage, salle.num)
+  const sante = santeSalle(salle.etage, salle.num)
+  const groups = groupItems(items)
+  const total = items.length
   return (
     <div className="tw-detail">
       <button className="tw-detail-close" onClick={onClose} aria-label="Fermer">×</button>

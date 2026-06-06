@@ -4,8 +4,8 @@
    Ici on mappe : plan.x -> monde X, plan.y -> monde Z, hauteur -> monde Y.
    Le bâtiment est recentré autour de l'origine.
    ============================================================ */
-import { SALLES, santeSalle } from '../data/parc'
-import type { Salle, SanteKey } from '../data/parc'
+import { SALLES } from '../data/parc'
+import type { Salle } from '../data/parc'
 
 export const SW = 2.7 // emprise cage d'escalier (x)
 export const ROOM_D = 3.6 // profondeur d'une salle (z)
@@ -31,7 +31,6 @@ const CZ = TOTAL_Y / 2
 export interface RoomSolid {
   kind: 'room'
   salle: Salle
-  sante: SanteKey
   /** centre monde (X, Z) et tailles */
   x: number
   z: number
@@ -205,7 +204,7 @@ export function buildFloor(etage: number): Solid[] {
     const addRoom = (num: string, x0: number, x1: number, zTop: number, depth: number) => {
       const s = salleByNum(etage, num)
       out.push({
-        kind: 'room', salle: s, sante: santeSalle(s),
+        kind: 'room', salle: s,
         x: (x0 + x1) / 2 - CX, z: zTop + depth / 2 - CZ, w: x1 - x0, d: depth, h: H,
       })
     }
@@ -262,7 +261,7 @@ export function buildFloor(etage: number): Solid[] {
       } else {
         const s = salleByNum(etage, slot.num)
         out.push({
-          kind: 'room', salle: s, sante: santeSalle(s),
+          kind: 'room', salle: s,
           x: cx + w / 2 - CX, z: z0 + ROOM_D / 2 - CZ, w, d: ROOM_D, h: H,
         })
       }

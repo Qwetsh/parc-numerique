@@ -123,6 +123,9 @@
 .btn-ghost:hover { background: var(--ink-50); border-color: var(--ink-300); }
 .btn-subtle { background: var(--ink-100); color: var(--ink-700); }
 .btn-subtle:hover { background: var(--ink-150); }
+.btn-danger { background: var(--bad-tint); color: var(--bad-ink); border-color: var(--bad-line); }
+.btn-danger:hover { background: var(--bad-solid); color: #fff; border-color: var(--bad-solid); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn svg { flex: none; }
 
 /* ---------------- Cartes ---------------- */

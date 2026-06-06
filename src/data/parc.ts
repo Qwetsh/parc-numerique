@@ -38,15 +38,16 @@ export interface Salle {
 }
 
 export interface Equipement {
-  id: string
+  id: string          // uuid (clé primaire Supabase)
+  reference: string   // code affiché (ex. PC-FIX-205-01)
   type: string
   modele: string
   annee: number
   etat: EtatKey
-  salle: string
-  salleNom: string
+  salle: string       // numéro de salle
+  salleNom: string    // dérivé des métadonnées de salle
   etage: number
-  cote: Cote
+  cote: Cote          // dérivé des métadonnées de salle
   proprietaire: string
 }
 
@@ -181,22 +182,46 @@ const AUTRES_SALLES: Salle[] = [
 
 SALLES.push(...AUTRES_SALLES)
 
-// ---- Santé d'une salle d'après son matériel ----
-export function santeSalle(s: Salle): SanteKey {
-  const actifs = s.equip.filter((e) => e.etat !== 'reforme')
+/* ============================================================
+   Données dynamiques : la santé et le nombre de postes d'une salle
+   sont désormais calculés à partir de l'inventaire en base (Supabase),
+   et non plus des données de démo embarquées. Voir data/parcStore.tsx.
+   Les fonctions ci-dessous opèrent sur une liste d'éléments {etat}.
+   ============================================================ */
+
+/** Santé d'une salle d'après la liste de ses équipements (par leur état). */
+export function santeFromList(items: { etat: EtatKey }[]): SanteKey {
+  const actifs = items.filter((e) => e.etat !== 'reforme')
   if (actifs.length === 0) return 'none'
   if (actifs.some((e) => e.etat === 'panne')) return 'panne'
   if (actifs.some((e) => e.etat === 'vetuste')) return 'vetuste'
   return 'fonctionnel'
 }
 
-export function nbPostes(s: Salle): number {
-  return s.equip.reduce((a, e) => a + e.n, 0)
+/** Clé d'une salle : le numéro n'est pas unique entre étages → on combine. */
+export const salleKey = (etage: number, num: string) => `${etage}|${num}`
+const SALLE_BY_KEY = new Map(SALLES.map((s) => [salleKey(s.etage, s.num), s]))
+/** Métadonnées statiques d'une salle (nom, type, côté, wifi…), depuis le plan. */
+export const salleMeta = (etage: number, num: string): Salle | undefined =>
+  SALLE_BY_KEY.get(salleKey(etage, num))
+
+/* ---- Jeu de démonstration servant à amorcer la base si elle est vide ---- */
+export interface EquipSeed {
+  reference: string
+  type: string
+  modele: string
+  annee: number
+  etat: EtatKey
+  salle: string
+  etage: number
+  proprietaire: string
 }
 
-// ---- Liste plate d'équipements (IDs générés) ----
-const PREFIX: Record<string, string> = { 'PC fixe': 'PC-FIX', 'PC portable': 'PC-PORT', 'Visualiseur': 'VISU', 'VPI': 'VPI', 'Tablette': 'TAB' }
-const EQUIPEMENTS: Equipement[] = []
+const PREFIX: Record<string, string> = {
+  'PC fixe': 'PC-FIX', 'PC portable': 'PC-PORT', 'Visualiseur': 'VISU', 'VPI': 'VPI', 'Tablette': 'TAB',
+}
+
+export const SEED_EQUIPEMENTS: EquipSeed[] = []
 SALLES.forEach((s) => {
   const counters: Record<string, number> = {}
   s.equip.forEach((g) => {
@@ -204,23 +229,35 @@ SALLES.forEach((s) => {
       const pre = PREFIX[g.type] || 'EQ'
       counters[pre] = (counters[pre] || 0) + 1
       const numSafe = String(s.num).replace(/\D/g, '') || s.num
-      const id = `${pre}-${numSafe}-${String(counters[pre]).padStart(2, '0')}`
-      EQUIPEMENTS.push({
-        id, type: g.type, modele: g.modele, annee: g.annee, etat: g.etat,
-        salle: s.num, salleNom: s.nom, etage: s.etage, cote: s.cote,
-        proprietaire: 'Conseil départemental',
+      SEED_EQUIPEMENTS.push({
+        reference: `${pre}-${numSafe}-${String(counters[pre]).padStart(2, '0')}`,
+        type: g.type, modele: g.modele, annee: g.annee, etat: g.etat,
+        salle: s.num, etage: s.etage, proprietaire: 'Conseil départemental',
       })
     }
   })
 })
 
+/** Génère la prochaine référence libre pour un type+salle (ex. PC-FIX-205-03). */
+export function nextReference(type: string, salle: string, existing: { reference: string }[]): string {
+  const pre = PREFIX[type] || 'EQ'
+  const numSafe = String(salle).replace(/\D/g, '') || salle
+  const base = `${pre}-${numSafe}-`
+  let max = 0
+  for (const e of existing) {
+    if (e.reference?.startsWith(base)) {
+      const n = parseInt(e.reference.slice(base.length), 10)
+      if (!Number.isNaN(n) && n > max) max = n
+    }
+  }
+  return `${base}${String(max + 1).padStart(2, '0')}`
+}
+
+/** Types d'équipement proposés dans le formulaire d'ajout. */
+export const TYPES_EQUIP = ['PC fixe', 'PC portable', 'Tablette', 'VPI', 'Visualiseur']
+
 export const ETAGE_LABEL: Record<number, string> = { 0: 'Rez-de-chaussée', 1: '1ᵉʳ étage', 2: '2ᵉ étage', 3: '3ᵉ étage' }
 export const ETAGE_COURT: Record<number, string> = { 0: 'RDC', 1: 'R+1', 2: 'R+2', 3: 'R+3' }
 export const ANNEE_REF = 2026
 
-export { SALLES, EQUIPEMENTS }
-
-export const PARC = {
-  ETATS, SALLES, EQUIPEMENTS, ETAGE_LABEL, ETAGE_COURT,
-  santeSalle, nbPostes, anneeRef: ANNEE_REF,
-}
+export { SALLES }

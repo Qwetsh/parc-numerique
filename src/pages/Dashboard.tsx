@@ -6,10 +6,9 @@ import { Badge } from '../components/Badge'
 import {
   IconAlert, IconArrowUp, IconClock, IconMonitor, IconPlus, IconSearch, IconTrend,
 } from '../components/Icon'
-import {
-  ANNEE_REF, EQUIPEMENTS, ETAGE_COURT, ETATS, SALLES, nbPostes, santeSalle,
-} from '../data/parc'
+import { ANNEE_REF, ETAGE_COURT, ETATS, SALLES } from '../data/parc'
 import type { EtatKey } from '../data/parc'
+import { useParc } from '../data/parcStore'
 import './Dashboard.css'
 
 // La tour 3D (Three.js) est chargée à la demande pour garder le dashboard léger.
@@ -33,19 +32,20 @@ interface Kpi {
 }
 
 export function Dashboard() {
+  const { equipements, santeSalle, equipOf } = useParc()
+
   const data = useMemo(() => {
-    const eq = EQUIPEMENTS
+    const eq = equipements
     const total = eq.length
-    const ages = eq.map((e) => ANNEE_REF - e.annee)
-    const ageMoy = ages.reduce((a, b) => a + b, 0) / total
+    const ageMoy = total ? eq.reduce((a, e) => a + (ANNEE_REF - e.annee), 0) / total : 0
     const vieux = eq.filter((e) => ANNEE_REF - e.annee > 5).length
-    const pctVieux = Math.round((vieux / total) * 100)
+    const pctVieux = total ? Math.round((vieux / total) * 100) : 0
     const enPanne = eq.filter((e) => e.etat === 'panne').length
 
     const counts: Record<EtatKey, number> = { fonctionnel: 0, vetuste: 0, panne: 0, reforme: 0 }
     eq.forEach((e) => { counts[e.etat]++ })
 
-    const maxFloor = Math.max(...[0, 1, 2, 3].map((f) => eq.filter((e) => e.etage === f).length))
+    const maxFloor = Math.max(1, ...[0, 1, 2, 3].map((f) => eq.filter((e) => e.etage === f).length))
     const floors = [3, 2, 1, 0].map((f) => {
       const items = eq.filter((e) => e.etage === f)
       const segs = ETAT_ORDER.map((o) => ({ etat: o, n: items.filter((e) => e.etat === o).length }))
@@ -53,7 +53,7 @@ export function Dashboard() {
       return { f, total: items.length, segs }
     })
 
-    const watch = SALLES.map((s) => ({ s, sante: santeSalle(s) }))
+    const watch = SALLES.map((s) => ({ s, sante: santeSalle(s.etage, s.num), items: equipOf(s.etage, s.num) }))
       .filter((x) => x.sante === 'panne' || x.sante === 'vetuste')
       .sort((a, b) => (a.sante === 'panne' ? 0 : 1) - (b.sante === 'panne' ? 0 : 1))
       .slice(0, 6)
@@ -61,10 +61,10 @@ export function Dashboard() {
     const typeCounts: Record<string, number> = {}
     eq.forEach((e) => { typeCounts[e.type] = (typeCounts[e.type] || 0) + 1 })
     const types = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])
-    const maxType = Math.max(...Object.values(typeCounts))
+    const maxType = Math.max(1, ...Object.values(typeCounts))
 
     return { total, ageMoy, vieux, pctVieux, enPanne, counts, maxFloor, floors, watch, types, maxType }
-  }, [])
+  }, [equipements, santeSalle, equipOf])
 
   const kpis: Kpi[] = [
     {
@@ -165,13 +165,13 @@ export function Dashboard() {
               <Link to="/vue-college">Ouvrir la maquette →</Link>
             </div>
             <div className="watch">
-              {data.watch.map(({ s, sante }) => {
+              {data.watch.map(({ s, sante, items }) => {
                 const cls = sante === 'panne' ? 'bad' : 'warn'
-                const nbPanne = s.equip.filter((e) => e.etat === 'panne').reduce((a, e) => a + e.n, 0)
-                const nbVet = s.equip.filter((e) => e.etat === 'vetuste').reduce((a, e) => a + e.n, 0)
+                const nbPanne = items.filter((e) => e.etat === 'panne').length
+                const nbVet = items.filter((e) => e.etat === 'vetuste').length
                 const detail = sante === 'panne'
-                  ? `${nbPanne} en panne · ${poste(nbPostes(s))}`
-                  : `${nbVet} vétuste · ${poste(nbPostes(s))}`
+                  ? `${nbPanne} en panne · ${poste(items.length)}`
+                  : `${nbVet} vétuste · ${poste(items.length)}`
                 const showNum = s.nom !== 'Salle ' + s.num
                 return (
                   <div className="item" key={`${s.etage}-${s.num}`}>

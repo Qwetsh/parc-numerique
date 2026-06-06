@@ -32,3 +32,46 @@
 .age-cell .ag.old { color: var(--warn-ink); font-weight: 600; }
 .empty { padding: var(--sp-12); text-align: center; color: var(--ink-500); }
 table.tbl tbody tr.clickable { cursor: pointer; }
+
+/* ---- Panneau formulaire (ajout / édition) ---- */
+.ef-scrim {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.34);
+  z-index: 40; animation: ef-fade 0.2s var(--ease);
+}
+@keyframes ef-fade { from { opacity: 0; } to { opacity: 1; } }
+.ef-panel {
+  position: fixed; top: 0; right: 0; height: 100%; width: 400px; max-width: 92vw;
+  background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--sh-lg);
+  z-index: 41; display: flex; flex-direction: column;
+  animation: ef-slide 0.28s var(--ease-out);
+}
+@keyframes ef-slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.ef-bar {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 18px 20px; border-bottom: 1px solid var(--line);
+}
+.ef-ref { font-size: var(--fs-h3); font-weight: 600; color: var(--ink-900); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.ef-close {
+  width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+  background: var(--surface); color: var(--ink-500); font-size: 20px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center; transition: all var(--t-fast);
+}
+.ef-close:hover { background: var(--ink-50); color: var(--ink-900); }
+
+.ef-body { padding: var(--sp-6); overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: var(--sp-5); }
+.ef-field { display: flex; flex-direction: column; gap: 6px; }
+.ef-field > span { font-size: var(--fs-sm); font-weight: 550; color: var(--ink-600); }
+.ef-field input, .ef-field select {
+  font-family: inherit; font-size: var(--fs-body); color: var(--ink-900); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm); height: 40px; padding: 0 12px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast); width: 100%;
+}
+.ef-field input:focus, .ef-field select:focus { outline: none; border-color: var(--brand-500); box-shadow: var(--ring); }
+.ef-field select { appearance: none; cursor: pointer; padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.ef-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.ef-hint { font-size: var(--fs-xs); color: var(--ink-400); margin: 0; }
+.ef-err { font-size: var(--fs-sm); color: var(--bad-ink); background: var(--bad-tint); border: 1px solid var(--bad-line); border-radius: var(--r-sm); padding: 9px 12px; margin: 0; }
+.ef-actions { display: flex; align-items: center; gap: var(--sp-3); margin-top: auto; padding-top: var(--sp-4); }
