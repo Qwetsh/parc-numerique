@@ -1,78 +1,8 @@
-/* Vue du collège — scène 3D plein écran + overlays */
+/* Vue du collège — conteneur plein écran pour la maquette 3D (tour éclatée).
+   La carte 3D (variant « page ») remplit la scène et porte son propre habillage. */
 .vc-main { height: 100vh; min-height: 0; display: flex; flex-direction: column; }
 .stage {
   position: relative; flex: 1; min-height: 0; overflow: hidden;
   background: radial-gradient(120% 90% at 50% 12%, #fbfcfe 0%, #f1f4f8 55%, #e9eef4 100%);
 }
 .stage canvas { display: block; outline: none; }
-
-/* en-tête flottant */
-.stage-head { position: absolute; top: var(--sp-6); left: var(--sp-8); z-index: 6; pointer-events: none; }
-.stage-head h2 { margin: 0; font-size: var(--fs-h1); font-weight: 600; letter-spacing: -.02em; }
-.stage-head p { margin: 4px 0 0; font-size: var(--fs-sm); color: var(--ink-500); }
-
-/* légende */
-.legend-box {
-  position: absolute; top: var(--sp-6); right: var(--sp-8); z-index: 6;
-  background: rgba(255,255,255,.82); backdrop-filter: blur(10px); border: 1px solid var(--line);
-  border-radius: var(--r-md); box-shadow: var(--sh-sm); padding: 14px 16px;
-}
-.legend-box .lt { font-size: var(--fs-eyebrow); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--ink-400); margin-bottom: 10px; }
-.legend-box .li { display: flex; align-items: center; gap: 9px; font-size: var(--fs-sm); color: var(--ink-700); padding: 3px 0; }
-.legend-box .mk { width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; border: 1px solid; }
-.legend-box .hint { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-400); max-width: 168px; line-height: 1.4; }
-
-/* sélecteur d'étage */
-.floors-sw { position: absolute; left: var(--sp-8); bottom: var(--sp-8); z-index: 6; display: flex; flex-direction: column; gap: 6px; }
-.floor-btn {
-  display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
-  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 14px 8px 10px; cursor: pointer; font-family: inherit;
-  box-shadow: var(--sh-xs); transition: all var(--t-fast) var(--ease); text-align: left; min-width: 188px;
-}
-.floor-btn:hover { border-color: var(--ink-300); transform: translateX(3px); }
-.floor-btn.active { background: var(--brand-600); border-color: var(--brand-600); box-shadow: var(--sh-md); }
-.floor-btn .fb-short { font-weight: 700; font-size: 15px; color: var(--ink-700); width: 34px; text-align: center; }
-.floor-btn.active .fb-short { color: #fff; }
-.floor-btn .fb-meta { display: flex; flex-direction: column; gap: 3px; }
-.floor-btn .fb-name { font-size: var(--fs-sm); font-weight: 550; color: var(--ink-700); }
-.floor-btn.active .fb-name { color: #fff; }
-.floor-btn .fb-dots { display: flex; align-items: center; gap: 5px; }
-.floor-btn .fdot { width: 7px; height: 7px; border-radius: 50%; }
-.floor-btn .fdot.ok { background: var(--ok-solid); } .floor-btn .fdot.warn { background: var(--warn-solid); } .floor-btn .fdot.bad { background: var(--bad-solid); }
-.floor-btn .fb-n { font-size: 11px; color: var(--ink-400); margin-left: 2px; }
-.floor-btn.active .fb-n { color: rgba(255,255,255,.75); }
-.floor-btn.active .fdot { box-shadow: 0 0 0 1.5px rgba(255,255,255,.5); }
-
-/* panneau latéral */
-.panel {
-  position: absolute; top: 0; right: 0; height: 100%; width: 392px; background: var(--surface);
-  border-left: 1px solid var(--line); box-shadow: var(--sh-lg); z-index: 12;
-  transform: translateX(100%); transition: transform .38s var(--ease-out); display: flex; flex-direction: column;
-}
-.panel.open { transform: translateX(0); }
-.panel-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--line); }
-.panel-bar .eyebrow { margin: 0; }
-.panel-close { width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--line-strong); background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--ink-500); transition: all var(--t-fast); }
-.panel-close:hover { background: var(--ink-50); color: var(--ink-900); }
-.p-body { padding: var(--sp-6); overflow-y: auto; flex: 1; }
-.p-top { display: flex; align-items: center; gap: 14px; }
-.p-num { width: 56px; height: 56px; border-radius: var(--r-md); background: var(--brand-50); color: var(--brand-700); display: grid; place-items: center; font-weight: 700; font-size: 18px; flex: none; font-variant-numeric: tabular-nums; }
-.p-name { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -.01em; }
-.p-type { font-size: var(--fs-sm); color: var(--ink-500); margin-top: 2px; }
-.p-tags { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: var(--sp-5); }
-.p-wifi { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-sm); color: var(--ink-600); font-weight: 500; }
-.p-stats { display: flex; gap: 10px; margin-top: var(--sp-5); }
-.p-stats .st { flex: 1; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; text-align: center; }
-.p-stats .v { font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1; }
-.p-stats .l { font-size: 11px; color: var(--ink-500); margin-top: 5px; }
-.p-sec { margin-top: var(--sp-6); margin-bottom: var(--sp-3); font-size: var(--fs-eyebrow); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--ink-400); }
-.eq-list { display: flex; flex-direction: column; gap: 8px; }
-.eq-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
-.eq-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--brand-50); color: var(--brand-600); display: grid; place-items: center; flex: none; }
-.eq-meta { flex: 1; min-width: 0; }
-.eq-t { font-size: var(--fs-body); font-weight: 550; color: var(--ink-900); }
-.eq-t .eq-n { color: var(--ink-400); font-weight: 600; margin-left: 2px; }
-.eq-m { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 1px; }
-.eq-empty { display: flex; align-items: center; gap: 14px; padding: 22px 16px; border: 1px dashed var(--line-strong); border-radius: var(--r-md); color: var(--ink-500); background: var(--none-tint); }
-.eq-empty svg { color: var(--ink-400); flex: none; }
-.eq-empty span { font-size: var(--fs-xs); color: var(--ink-400); }
