@@ -30,11 +30,13 @@ export function Sidebar() {
         <NavLink to="/vue-college" className={linkClass}>
           <IconBuilding /> Vue du collège
         </NavLink>
+        <NavLink to="/signalements" className={linkClass}>
+          <IconTicket /> Signalements
+        </NavLink>
       </nav>
 
       <div className="nav-group-label">Bientôt</div>
       <nav className="nav">
-        <a className="soon"><IconTicket /> Tickets <span className="nav-soon-tag">Bientôt</span></a>
         <a className="soon"><IconSoftware /> Logiciels <span className="nav-soon-tag">Bientôt</span></a>
         <a className="soon"><IconRequest /> Demandes <span className="nav-soon-tag">Bientôt</span></a>
         <a className="soon"><IconMemory /> Mémoire <span className="nav-soon-tag">Bientôt</span></a>

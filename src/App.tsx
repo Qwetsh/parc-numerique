@@ -3,18 +3,24 @@ import { Outlet, Route, Routes } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { Equipements } from './pages/Equipements'
+import { Signalements } from './pages/Signalements'
+import { Signaler } from './pages/Signaler'
+import { ParcProvider } from './data/parcStore'
 
 // La vue 3D (Three.js) et la page design sont chargées à la demande
 // pour garder le chargement initial léger.
 const VueCollege = lazy(() => import('./pages/VueCollege').then((m) => ({ default: m.VueCollege })))
 const DesignSystem = lazy(() => import('./pages/DesignSystem').then((m) => ({ default: m.DesignSystem })))
 
-function Layout() {
+// Espace admin : Sidebar + inventaire chargé depuis Supabase (ParcProvider).
+function AdminLayout() {
   return (
-    <div className="app">
-      <Sidebar />
-      <Outlet />
-    </div>
+    <ParcProvider>
+      <div className="app">
+        <Sidebar />
+        <Outlet />
+      </div>
+    </ParcProvider>
   )
 }
 
@@ -30,9 +36,13 @@ export default function App() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route element={<Layout />}>
+        {/* Page publique enseignant (QR code) — hors espace admin, sans store ni sidebar */}
+        <Route path="/signaler/:equipementId" element={<Signaler />} />
+
+        <Route element={<AdminLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/equipements" element={<Equipements />} />
+          <Route path="/signalements" element={<Signalements />} />
           <Route path="/vue-college" element={<VueCollege />} />
         </Route>
         <Route path="/design-system" element={<DesignSystem />} />

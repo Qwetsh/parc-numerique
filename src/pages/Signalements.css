@@ -1,0 +1,61 @@
+/* Vue admin des signalements */
+.sgl-filters { display: flex; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-5); }
+.sgl-chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: var(--surface);
+  font-family: inherit; font-size: var(--fs-sm); font-weight: 550; color: var(--ink-600);
+  cursor: pointer; transition: all var(--t-fast) var(--ease);
+}
+.sgl-chip:hover { border-color: var(--ink-300); }
+.sgl-chip.active { background: var(--ink-900); border-color: var(--ink-900); color: #fff; }
+.sgl-chip-n {
+  font-variant-numeric: tabular-nums; font-size: var(--fs-xs); font-weight: 600;
+  background: var(--ink-100); color: var(--ink-600); border-radius: var(--r-pill); padding: 1px 7px;
+}
+.sgl-chip.active .sgl-chip-n { background: rgba(255,255,255,.22); color: #fff; }
+
+.sgl-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sgl-card {
+  display: flex; align-items: flex-start; gap: var(--sp-5); justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 16px 18px; border-left: 3px solid var(--ink-200);
+}
+.sgl-card.st-ouvert { border-left-color: var(--bad-solid); }
+.sgl-card.st-en_cours { border-left-color: var(--warn-solid); }
+.sgl-card.st-resolu { border-left-color: var(--ok-solid); }
+
+.sgl-main { min-width: 0; flex: 1; }
+.sgl-top { display: flex; align-items: center; gap: 10px; }
+.sgl-probleme { font-weight: 600; font-size: var(--fs-body); color: var(--ink-900); }
+.sgl-badge { font-size: var(--fs-xs); font-weight: 600; padding: 2px 9px; border-radius: var(--r-pill); }
+.sgl-badge.st-ouvert { background: var(--bad-tint); color: var(--bad-ink); }
+.sgl-badge.st-en_cours { background: var(--warn-tint); color: var(--warn-ink); }
+.sgl-badge.st-resolu { background: var(--ok-tint); color: var(--ok-ink); }
+
+.sgl-equip { font-size: var(--fs-sm); color: var(--ink-600); margin-top: 4px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.sgl-floor { font-size: var(--fs-xs); font-weight: 600; background: var(--ink-100); color: var(--ink-600); border-radius: var(--r-sm); padding: 1px 7px; }
+.sgl-desc { margin: 8px 0 0; font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.45; }
+.sgl-meta { display: flex; align-items: center; gap: 12px; margin-top: 9px; font-size: var(--fs-xs); color: var(--ink-500); flex-wrap: wrap; }
+.sgl-who { font-weight: 550; color: var(--ink-700); }
+.sgl-mail { color: var(--brand-600); text-decoration: none; }
+.sgl-mail:hover { text-decoration: underline; }
+.sgl-date { margin-left: auto; }
+
+.sgl-actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.sgl-statut-btn {
+  font-family: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-600);
+  border-radius: var(--r-sm); padding: 6px 12px; min-width: 92px; text-align: center;
+  transition: all var(--t-fast) var(--ease);
+}
+.sgl-statut-btn:hover:not(:disabled) { border-color: var(--ink-300); background: var(--ink-50); }
+.sgl-statut-btn.active { cursor: default; }
+.sgl-statut-btn.st-ouvert.active { background: var(--bad-tint); color: var(--bad-ink); border-color: var(--bad-line); }
+.sgl-statut-btn.st-en_cours.active { background: var(--warn-tint); color: var(--warn-ink); border-color: var(--warn-line); }
+.sgl-statut-btn.st-resolu.active { background: var(--ok-tint); color: var(--ok-ink); border-color: var(--ok-line); }
+
+@media (max-width: 720px) {
+  .sgl-card { flex-direction: column; gap: var(--sp-3); }
+  .sgl-actions { flex-direction: row; width: 100%; }
+  .sgl-statut-btn { flex: 1; min-width: 0; }
+}
