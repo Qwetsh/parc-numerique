@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, Line, OrbitControls } from '@react-three/drei'
+import { ContactShadows, Edges, Line, OrbitControls, Text } from '@react-three/drei'
 import { Room3D } from './Room3D'
 import { Stair3D } from './Stair3D'
 import {
@@ -64,19 +64,51 @@ function Scene({ etage, selected, onSelect }: Props) {
       />
 
       {/* volumes */}
-      {solids.map((s, i) =>
-        s.kind === 'room' ? (
-          <Room3D
-            key={s.salle.num}
-            solid={s}
-            selected={selected === s.salle.num}
-            hasSelection={hasSelection}
-            onSelect={onSelect}
-          />
-        ) : (
-          <Stair3D key={`stair-${i}`} solid={s} />
-        ),
-      )}
+      {solids.map((s, i) => {
+        if (s.kind === 'room') {
+          return (
+            <Room3D
+              key={s.salle.num}
+              solid={s}
+              selected={selected === s.salle.num}
+              hasSelection={hasSelection}
+              onSelect={onSelect}
+            />
+          )
+        }
+        if (s.kind === 'stair') return <Stair3D key={`stair-${i}`} solid={s} />
+        if (s.kind === 'wall') {
+          // cloison visible : fine boîte verticale
+          return (
+            <mesh key={`wall-${i}`} position={[s.x, s.h / 2, s.z]} castShadow receiveShadow>
+              <boxGeometry args={[s.w, s.h, s.d]} />
+              <meshStandardMaterial color={PLINTH_SHADE.dark} roughness={0.9} />
+              <Edges threshold={15} color="#9aa7bb" />
+            </mesh>
+          )
+        }
+        // couloir (transversal ou de suite) : bande de sol, libellé optionnel
+        return (
+          <group key={`corr-${i}`}>
+            <mesh position={[s.x, 0.02, s.z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+              <planeGeometry args={[s.w, s.d]} />
+              <meshStandardMaterial color={CORR_FILL} roughness={0.95} />
+            </mesh>
+            {s.label && (
+              <Text
+                position={[s.x, 0.05, s.z]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                fontSize={0.5}
+                color="#8593a6"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {s.label}
+              </Text>
+            )}
+          </group>
+        )
+      })}
 
       {/* ancrage doux sur le plan */}
       <ContactShadows

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Topbar } from '../components/Topbar'
@@ -11,6 +11,9 @@ import {
 } from '../data/parc'
 import type { EtatKey } from '../data/parc'
 import './Dashboard.css'
+
+// La tour 3D (Three.js) est chargée à la demande pour garder le dashboard léger.
+const BuildingTower3D = lazy(() => import('../college3d/BuildingTower3D'))
 
 const ETAT_ORDER: EtatKey[] = ['fonctionnel', 'vetuste', 'panne', 'reforme']
 const ETAT_COLOR: Record<EtatKey, string> = {
@@ -122,7 +125,7 @@ export function Dashboard() {
           ))}
         </div>
 
-        <div className="grid-2">
+        <div className="grid-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
           {/* Répartition par état */}
           <div className="card card-pad">
             <div className="panel-head">
@@ -148,23 +151,10 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Parc par étage */}
-          <div className="card card-pad">
-            <div className="panel-head"><h3>Parc par étage</h3></div>
-            <div className="floors">
-              {data.floors.map(({ f, total, segs }) => (
-                <div className="floor-row" key={f}>
-                  <span className="fl">{ETAGE_COURT[f]}</span>
-                  <span className="bar">
-                    {segs.map((s) => (
-                      <i key={s.etat} style={{ width: `${(s.n / data.maxFloor) * 100}%`, background: ETAT_COLOR[s.etat] }} />
-                    ))}
-                  </span>
-                  <span className="ct tnum">{total}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Maquette 3D du collège */}
+          <Suspense fallback={<div className="card tw-card tw-loading">Chargement de la maquette…</div>}>
+            <BuildingTower3D />
+          </Suspense>
         </div>
 
         <div className="grid-2" style={{ gridTemplateColumns: '1fr 1fr' }}>

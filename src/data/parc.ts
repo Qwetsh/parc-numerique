@@ -65,14 +65,23 @@ const SALLES: Salle[] = [
      Le champ `poids` reflète la largeur réelle de chaque salle. */
 
   // -- Rangée nord --
-  { etage: 1, num: '201', nom: 'Salle 201', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 1.15,
-    equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2020, etat: 'fonctionnel', n: 1 } ] },
+  // 201 = une SUITE subdivisée : 5 pièces profondes (façade nord) desservies par
+  // un couloir interne « 201 » (séparé du couloir central par un mur), + un WC.
+  // « 201 » est donc une circulation, pas une salle inventoriée.
+  { etage: 1, num: 'P1', nom: 'Pièce', type: 'Bureau', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 1, num: 'P2', nom: 'Pièce', type: 'Bureau', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 1, num: 'P3', nom: 'Pièce', type: 'Bureau', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 1, num: 'P4', nom: 'Pièce', type: 'Bureau', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 1, num: 'P5', nom: 'Pièce', type: 'Bureau', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 1, num: 'WC2', nom: 'Toilettes', type: 'Sanitaires', cote: 'nord', wifi: 'faible', equip: [] },
   { etage: 1, num: '203', nom: 'Salle 203', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', poids: 0.75, equip: [] },
   { etage: 1, num: '205', nom: 'Salle 205', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', poids: 1.0,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 7010', annee: 2014, etat: 'vetuste', n: 1 } ] },
-  // 207 + 209 = une seule salle sur le plan
-  { etage: 1, num: '207', nom: 'Salle 207', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 2.0,
-    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2021, etat: 'fonctionnel', n: 1 }, { type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2020, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'NEC M300W', annee: 2013, etat: 'vetuste', n: 1 } ] },
+  // 207 et 209 = deux salles séparées (207 très petite)
+  { etage: 1, num: '207', nom: 'Salle 207', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
+    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
+  { etage: 1, num: '209', nom: 'Salle 209', type: 'Salle de classe', cote: 'nord', wifi: 'bonne',
+    equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2020, etat: 'fonctionnel', n: 1 }, { type: 'VPI', modele: 'Epson EB-695Wi', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
   { etage: 1, num: '211', nom: 'Salle 211', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', poids: 1.2,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
   { etage: 1, num: '213', nom: 'Salle 213', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', poids: 0.55, equip: [] },
@@ -80,6 +89,7 @@ const SALLES: Salle[] = [
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2022, etat: 'fonctionnel', n: 2 } ] },
 
   // -- Rangée sud --
+  { etage: 1, num: 'WC1', nom: 'Toilettes', type: 'Sanitaires', cote: 'sud', wifi: 'faible', equip: [] },
   { etage: 1, num: 'SDP', nom: 'Salle des profs', type: 'Salle des professeurs', cote: 'sud', wifi: 'bonne', poids: 1.25,
     equip: [ { type: 'PC fixe', modele: 'HP ProDesk 400 G7', annee: 2021, etat: 'fonctionnel', n: 3 } ] },
   // 204 + 206 = le CDI (une seule grande salle sur le plan)
@@ -89,70 +99,87 @@ const SALLES: Salle[] = [
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 7010', annee: 2015, etat: 'panne', n: 1 } ] },
   { etage: 1, num: '210', nom: 'Salle informatique', type: 'Salle informatique', cote: 'sud', wifi: 'bonne', poids: 2.0,
     equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 13 }, { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'panne', n: 1 } ] },
-  // 212 + 214 = une seule salle sur le plan
-  { etage: 1, num: '212', nom: 'Salle 212', type: 'Salle de classe', cote: 'sud', wifi: 'faible', poids: 1.8,
+  // 212 et 214 = deux salles séparées (214 toute petite)
+  { etage: 1, num: '212', nom: 'Salle 212', type: 'Salle de classe', cote: 'sud', wifi: 'faible',
     equip: [ { type: 'PC portable', modele: 'Dell Latitude 3540', annee: 2016, etat: 'vetuste', n: 1 } ] },
+  { etage: 1, num: '214', nom: 'Salle 214', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne',
+    equip: [ { type: 'PC fixe', modele: 'Dell OptiPlex 3080', annee: 2021, etat: 'fonctionnel', n: 1 } ] },
 ]
 
-// ---- Génération légère des autres étages (RDC, R+2, R+3) ----
-const TYPES_SALLE = ['Salle de classe', 'Salle de classe', 'Salle de classe', 'Salle banalisée']
-const WIFI: WifiKey[] = ['bonne', 'bonne', 'moyenne', 'faible']
+/* ============================================================
+   Autres étages — transcrits du plan 2D (numéros, noms, salles VPI,
+   salles vides « X », grandes salles). Le plan ne précise pas l'état
+   du matériel : les états (fonctionnel/vétuste/panne) restent une
+   répartition d'exemple réaliste.
+   ============================================================ */
+const PCF = (annee: number, etat: EtatKey, n = 1): EquipGroupe => ({ type: 'PC fixe', modele: etat === 'vetuste' ? 'Dell OptiPlex 7010' : annee <= 2019 ? 'HP ProDesk 400 G6' : 'Dell OptiPlex 3080', annee, etat, n })
+const VPI = (annee = 2020): EquipGroupe => ({ type: 'VPI', modele: 'Epson EB-695Wi', annee, etat: 'fonctionnel', n: 1 })
 
-interface PlanSalle {
-  num: string
-  cote: Cote
-  nom?: string
-  type?: string
-  kind?: 'X' | 'info'
-}
+const AUTRES_SALLES: Salle[] = [
+  /* ---------------- Rez-de-chaussée (RDC, salles 1xx) — fidèle au plan réel ----------------
+     Structure : aile gauche (101→112) / noyau central (couloir transversal nord + escalier sud)
+     / aile droite (113→117 et 114-116). Fusions réelles : 102+104 = local technique,
+     108+110 = Permanence. 107/109/111 = pôle infirmerie + toilettes (blocs cliquables sans parc).
+     Les largeurs sont fixées dans la table de disposition (college3d/geometry.ts). */
+  // Rangée nord
+  { etage: 0, num: '101', nom: 'Salle 101', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 0, num: '103', nom: 'Salle 103', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 0, num: '105', nom: 'Salle Speechi', type: 'Salle multimédia', cote: 'nord', wifi: 'bonne', equip: [ PCF(2019, 'fonctionnel', 12) ] },
+  { etage: 0, num: '107', nom: 'Infirmerie', type: 'Infirmerie', cote: 'nord', wifi: 'bonne', equip: [] },
+  { etage: 0, num: '109', nom: 'Attente infirmerie', type: "Salle d'attente", cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 0, num: '111', nom: 'Toilettes', type: 'Sanitaires', cote: 'nord', wifi: 'faible', equip: [] },
+  { etage: 0, num: '113', nom: 'Salle 113', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel'), VPI(2020) ] },
+  { etage: 0, num: '115', nom: 'Salle 115', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 0, num: '117', nom: 'Salle 117', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2019, 'fonctionnel') ] },
+  // Rangée sud
+  { etage: 0, num: '102', nom: 'Local technique', type: 'Local technique', cote: 'sud', wifi: 'faible', equip: [] }, // 102 + 104 fusionnés
+  { etage: 0, num: '106', nom: 'Salle 106', type: 'Salle de classe', cote: 'sud', wifi: 'faible', equip: [ PCF(2015, 'panne') ] },
+  { etage: 0, num: '110', nom: 'Permanence', type: 'Vie scolaire', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel', 2) ] }, // 108 + 110 fusionnés
+  { etage: 0, num: '112', nom: 'Salle 112', type: 'Salle banalisée', cote: 'sud', wifi: 'faible', equip: [] },
+  { etage: 0, num: '114', nom: 'Salle 114', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2019, 'fonctionnel', 3) ] },
+  { etage: 0, num: '116', nom: 'Salle 116', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
 
-function genEtage(etage: number, plans: PlanSalle[]): void {
-  plans.forEach((p, i) => {
-    const num = p.num
-    const cote = p.cote
-    let equip: EquipGroupe[] = []
-    const seed = etage * 17 + i * 7
-    if (p.kind === 'X') {
-      equip = []
-    } else if (p.kind === 'info') {
-      equip = [ { type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2019, etat: 'fonctionnel', n: 12 } ]
-      if (seed % 2 === 0) equip.push({ type: 'PC fixe', modele: 'HP ProDesk 400 G6', annee: 2019, etat: 'vetuste', n: 2 })
-    } else {
-      const r = seed % 10
-      const etat: EtatKey = r < 5 ? 'fonctionnel' : r < 7 ? 'vetuste' : r < 8 ? 'panne' : 'fonctionnel'
-      equip = [ { type: 'PC fixe', modele: etat === 'vetuste' ? 'Dell OptiPlex 7010' : 'Dell OptiPlex 3080', annee: etat === 'vetuste' ? 2014 : 2021, etat, n: 1 } ]
-      if (r % 3 === 0) equip.push({ type: 'VPI', modele: 'Epson EB-695Wi', annee: 2019, etat: 'fonctionnel', n: 1 })
-    }
-    SALLES.push({
-      etage,
-      num,
-      nom: p.nom || 'Salle ' + num,
-      type: p.type || TYPES_SALLE[i % TYPES_SALLE.length],
-      cote,
-      wifi: WIFI[seed % WIFI.length],
-      equip,
-    })
-  })
-}
+  /* ---------------- 2e étage (R+2, salles 3xx) — fidèle au plan ----------------
+     Nord = 6 salles seulement (301→311) ; 313/315 n'existent pas. */
+  // Rangée nord
+  { etage: 2, num: '301', nom: 'Salle 301', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel'), VPI(2020) ] },
+  { etage: 2, num: '303', nom: 'Salle 303', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', equip: [] },
+  { etage: 2, num: '305', nom: 'Salle 305', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 2, num: '307', nom: 'Salle 307', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', equip: [ PCF(2014, 'vetuste') ] },
+  { etage: 2, num: '309', nom: 'Salle 309', type: 'Salle banalisée', cote: 'nord', wifi: 'faible', equip: [] },
+  { etage: 2, num: '311', nom: 'Salle 311', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  // Rangée sud
+  { etage: 2, num: 'WC3', nom: 'Toilettes', type: 'Sanitaires', cote: 'sud', wifi: 'faible', equip: [] },
+  { etage: 2, num: '302', nom: 'Salle 302', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 2, num: '304', nom: 'Salle 304', type: 'Salle de classe', cote: 'sud', wifi: 'faible', equip: [ PCF(2015, 'panne') ] },
+  { etage: 2, num: '306', nom: 'Salle 306', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel'), VPI(2019) ] },
+  { etage: 2, num: '308', nom: 'Salle 308', type: 'Salle banalisée', cote: 'sud', wifi: 'moyenne', poids: 0.7, equip: [] },
+  { etage: 2, num: '310', nom: 'Salle 310', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 2, num: '312', nom: 'Salle 312', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2014, 'vetuste') ] },
+  { etage: 2, num: '314', nom: 'Salle 314', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
 
-// Rez-de-chaussée (niveau 0, salles 1xx)
-genEtage(0, [
-  { num: '101', cote: 'nord' }, { num: '103', cote: 'nord' }, { num: '105', cote: 'nord', nom: 'Salle Speechi', type: 'Salle multimédia', kind: 'info' },
-  { num: '107', cote: 'nord' }, { num: '109', cote: 'nord' }, { num: '111', cote: 'nord' }, { num: '113', cote: 'nord', kind: 'X' }, { num: '115', cote: 'nord' }, { num: '117', cote: 'nord' },
-  { num: '102', cote: 'sud' }, { num: '104', cote: 'sud' }, { num: '106', cote: 'sud' }, { num: '108', cote: 'sud' }, { num: '110', cote: 'sud', nom: 'Permanence', type: 'Vie scolaire' }, { num: '112', cote: 'sud', kind: 'X' }, { num: '114', cote: 'sud' }, { num: '116', cote: 'sud' },
-])
+  /* ---------------- 3e étage (R+3, salles 4xx) — pas d'escalier central ---------------- */
+  // Rangée nord
+  { etage: 3, num: '401', nom: 'Salle 401', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '403', nom: 'Salle 403', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '405', nom: 'Salle 405', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '407', nom: 'Salle 407', type: 'Salle de classe', cote: 'nord', wifi: 'moyenne', equip: [ PCF(2014, 'vetuste') ] },
+  { etage: 3, num: '409', nom: 'Salle 409', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '411', nom: 'Salle 411', type: 'Salle de classe', cote: 'nord', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel'), VPI(2020) ] },
+  { etage: 3, num: '413', nom: 'Salle 413', type: 'Salle banalisée', cote: 'nord', wifi: 'moyenne', poids: 0.7, equip: [] },
+  { etage: 3, num: '415', nom: 'Salle 415', type: 'Salle banalisée', cote: 'nord', wifi: 'faible', poids: 0.7, equip: [] },
+  // Rangée sud — 6 salles (402→412, 412 large) encadrées de WC ; 414 n'existe pas
+  { etage: 3, num: 'WC4', nom: 'Toilettes', type: 'Sanitaires', cote: 'sud', wifi: 'faible', equip: [] },
+  { etage: 3, num: '402', nom: 'Salle 402', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '404', nom: 'Salle 404', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '406', nom: 'Salle 406', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '408', nom: 'Salle 408', type: 'Salle de classe', cote: 'sud', wifi: 'faible', equip: [ PCF(2015, 'panne') ] },
+  { etage: 3, num: '410', nom: 'Salle 410', type: 'Salle de classe', cote: 'sud', wifi: 'bonne', equip: [ PCF(2021, 'fonctionnel') ] },
+  { etage: 3, num: '412', nom: 'Salle 412', type: 'Salle de classe', cote: 'sud', wifi: 'moyenne', equip: [ PCF(2022, 'fonctionnel') ] },
+  { etage: 3, num: 'WC5', nom: 'Toilettes', type: 'Sanitaires', cote: 'sud', wifi: 'faible', equip: [] },
+]
 
-// 2e étage (niveau 2, salles 3xx)
-genEtage(2, [
-  { num: '301', cote: 'nord' }, { num: '303', cote: 'nord', kind: 'X' }, { num: '305', cote: 'nord' }, { num: '307', cote: 'nord' }, { num: '309', cote: 'nord', kind: 'X' }, { num: '311', cote: 'nord' }, { num: '313', cote: 'nord' }, { num: '315', cote: 'nord' },
-  { num: '302', cote: 'sud' }, { num: '304', cote: 'sud' }, { num: '306', cote: 'sud' }, { num: '308', cote: 'sud', kind: 'X' }, { num: '310', cote: 'sud' }, { num: '312', cote: 'sud' }, { num: '314', cote: 'sud' },
-])
-
-// 3e étage (niveau 3, salles 4xx)
-genEtage(3, [
-  { num: '401', cote: 'nord' }, { num: '403', cote: 'nord' }, { num: '405', cote: 'nord' }, { num: '407', cote: 'nord' }, { num: '409', cote: 'nord' }, { num: '411', cote: 'nord' }, { num: '413', cote: 'nord', kind: 'X' }, { num: '415', cote: 'nord', kind: 'X' },
-  { num: '402', cote: 'sud' }, { num: '404', cote: 'sud' }, { num: '406', cote: 'sud' }, { num: '408', cote: 'sud' }, { num: '410', cote: 'sud' }, { num: '412', cote: 'sud' }, { num: '414', cote: 'sud' },
-])
+SALLES.push(...AUTRES_SALLES)
 
 // ---- Santé d'une salle d'après son matériel ----
 export function santeSalle(s: Salle): SanteKey {
