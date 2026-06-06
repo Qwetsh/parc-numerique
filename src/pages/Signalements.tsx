@@ -5,6 +5,8 @@ import {
   STATUT_LABEL, listSignalements, setStatut,
 } from '../lib/signalements'
 import type { Signalement, Statut } from '../lib/signalements'
+import { buildCorps, buildObjet, composeMessage, loadSettings, saveSettings } from '../lib/reparation'
+import type { ReparationSettings } from '../lib/reparation'
 import './Signalements.css'
 
 const STATUTS: Statut[] = ['ouvert', 'en_cours', 'resolu']
@@ -19,6 +21,7 @@ export function Signalements() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filtre, setFiltre] = useState<Statut | 'tous'>('tous')
+  const [demande, setDemande] = useState<Signalement | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -101,11 +104,90 @@ export function Signalements() {
                     {STATUT_LABEL[st]}
                   </button>
                 ))}
+                <button className="sgl-prep-btn" onClick={() => setDemande(s)}>
+                  ✉ Préparer la demande
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {demande && <DemandeReparation s={demande} onClose={() => setDemande(null)} />}
     </main>
+  )
+}
+
+/* ============================================================
+   Panneau « Préparer la demande de réparation » — message
+   précomplété à copier ; destinataire et signature mémorisés.
+   ============================================================ */
+function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void }) {
+  const [settings, setSettings] = useState<ReparationSettings>(loadSettings)
+  const [objet, setObjet] = useState(() => buildObjet(s))
+  const [corps, setCorps] = useState(() => buildCorps(s, settings.signature))
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => { setObjet(buildObjet(s)) }, [s])
+  // régénère le corps quand le signalement ou la signature mémorisée change
+  useEffect(() => { setCorps(buildCorps(s, settings.signature)) }, [s, settings.signature])
+
+  function patch(p: Partial<ReparationSettings>) {
+    const next = { ...settings, ...p }
+    setSettings(next)
+    saveSettings(next)
+  }
+
+  async function copier() {
+    try {
+      await navigator.clipboard.writeText(composeMessage(settings.destinataire, objet, corps))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* presse-papiers indisponible (contexte non sécurisé) */ }
+  }
+
+  return (
+    <>
+      <div className="dr-scrim" onClick={onClose} />
+      <aside className="dr-panel" aria-label="Préparer la demande de réparation">
+        <div className="dr-bar">
+          <span className="eyebrow">Demande de réparation</span>
+          <button className="dr-close" onClick={onClose} aria-label="Fermer">×</button>
+        </div>
+        <div className="dr-body">
+          <p className="dr-hint">À copier puis coller dans le Guichet Unique (Moselle Éducation), un email, ou un message au gestionnaire.</p>
+
+          <label className="dr-field">
+            <span>Destinataire <em>(mémorisé)</em></span>
+            <input
+              value={settings.destinataire}
+              onChange={(e) => patch({ destinataire: e.target.value })}
+              placeholder="ex. Guichet Unique / gestionnaire"
+            />
+          </label>
+
+          <label className="dr-field">
+            <span>Objet</span>
+            <input value={objet} onChange={(e) => setObjet(e.target.value)} />
+          </label>
+
+          <label className="dr-field">
+            <span>Message</span>
+            <textarea value={corps} onChange={(e) => setCorps(e.target.value)} rows={13} />
+          </label>
+
+          <label className="dr-field">
+            <span>Signature <em>(mémorisée)</em></span>
+            <textarea value={settings.signature} onChange={(e) => patch({ signature: e.target.value })} rows={2} />
+          </label>
+
+          <div className="dr-actions">
+            <span className="dr-copied">{copied ? '✓ Copié dans le presse-papiers' : ''}</span>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>Fermer</button>
+            <button type="button" className="btn btn-primary" onClick={copier}>Copier le message</button>
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }

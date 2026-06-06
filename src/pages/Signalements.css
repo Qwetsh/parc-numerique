@@ -54,8 +54,48 @@
 .sgl-statut-btn.st-en_cours.active { background: var(--warn-tint); color: var(--warn-ink); border-color: var(--warn-line); }
 .sgl-statut-btn.st-resolu.active { background: var(--ok-tint); color: var(--ok-ink); border-color: var(--ok-line); }
 
+.sgl-prep-btn {
+  margin-top: 4px; font-family: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer;
+  border: 1px solid var(--brand-200, #c7d8f5); background: var(--brand-50); color: var(--brand-700);
+  border-radius: var(--r-sm); padding: 7px 12px; min-width: 92px; text-align: center;
+  transition: all var(--t-fast) var(--ease);
+}
+.sgl-prep-btn:hover { background: var(--brand-100, #dbe6fb); border-color: var(--brand-300, #a9c4ef); }
+
 @media (max-width: 720px) {
   .sgl-card { flex-direction: column; gap: var(--sp-3); }
-  .sgl-actions { flex-direction: row; width: 100%; }
+  .sgl-actions { flex-direction: row; flex-wrap: wrap; width: 100%; }
   .sgl-statut-btn { flex: 1; min-width: 0; }
+  .sgl-prep-btn { flex-basis: 100%; }
 }
+
+/* Panneau « Préparer la demande » */
+.dr-scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.34); z-index: 40; animation: dr-fade 0.2s var(--ease); }
+@keyframes dr-fade { from { opacity: 0; } to { opacity: 1; } }
+.dr-panel {
+  position: fixed; top: 0; right: 0; height: 100%; width: 460px; max-width: 94vw;
+  background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--sh-lg);
+  z-index: 41; display: flex; flex-direction: column; animation: dr-slide 0.28s var(--ease-out);
+}
+@keyframes dr-slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.dr-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.dr-close {
+  width: 34px; height: 34px; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+  background: var(--surface); color: var(--ink-500); font-size: 20px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center; transition: all var(--t-fast);
+}
+.dr-close:hover { background: var(--ink-50); color: var(--ink-900); }
+.dr-body { padding: var(--sp-5) var(--sp-6); overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: var(--sp-4); }
+.dr-hint { margin: 0; font-size: var(--fs-xs); color: var(--ink-500); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 9px 11px; }
+.dr-field { display: flex; flex-direction: column; gap: 6px; }
+.dr-field > span { font-size: var(--fs-sm); font-weight: 550; color: var(--ink-700); }
+.dr-field > span em { font-style: normal; font-weight: 400; color: var(--ink-400); }
+.dr-field input, .dr-field textarea {
+  font-family: inherit; font-size: var(--fs-sm); color: var(--ink-900); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 9px 12px; width: 100%;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.dr-field textarea { resize: vertical; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.dr-field input:focus, .dr-field textarea:focus { outline: none; border-color: var(--brand-500); box-shadow: var(--ring); }
+.dr-actions { display: flex; align-items: center; gap: var(--sp-3); margin-top: auto; padding-top: var(--sp-4); }
+.dr-copied { flex: 1; font-size: var(--fs-xs); color: var(--ok-ink); font-weight: 600; }
