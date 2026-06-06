@@ -21,6 +21,10 @@ export interface EquipInput {
   salle: string
   etage: number
   proprietaire: string
+  numero_serie: string | null
+  num_inventaire: string | null
+  os: string | null
+  notes: string | null
 }
 
 /** Ligne brute telle que stockée en base (sans salleNom/cote, dérivés du plan). */

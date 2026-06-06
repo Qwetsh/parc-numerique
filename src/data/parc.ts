@@ -49,6 +49,10 @@ export interface Equipement {
   etage: number
   cote: Cote          // dérivé des métadonnées de salle
   proprietaire: string
+  numero_serie: string | null   // n° de série constructeur
+  num_inventaire: string | null // n° d'inventaire / étiquette département
+  os: string | null             // système d'exploitation
+  notes: string | null          // observations libres
 }
 
 export const ETATS: Record<EtatKey, EtatDef> = {

@@ -44,8 +44,14 @@ export function buildObjet(s: Signalement): string {
   return `Demande de réparation — ${s.equipement_ref ?? 'équipement'} · ${localisation(s)}`
 }
 
+/** Détails techniques optionnels (récupérés sur la fiche équipement). */
+export interface EquipExtra {
+  numero_serie?: string | null
+  num_inventaire?: string | null
+}
+
 /** Corps du message (incluant la signature). */
-export function buildCorps(s: Signalement, signature: string): string {
+export function buildCorps(s: Signalement, signature: string, extra?: EquipExtra): string {
   const date = new Date(s.created_at).toLocaleDateString('fr-FR')
   const lignes = [
     'Bonjour,',
@@ -53,9 +59,13 @@ export function buildCorps(s: Signalement, signature: string): string {
     'Je vous signale une panne sur un équipement du parc numérique du collège, à prendre en charge :',
     '',
     `• Équipement   : ${s.equipement_ref ?? '—'}`,
+  ]
+  if (extra?.numero_serie) lignes.push(`• N° de série   : ${extra.numero_serie}`)
+  if (extra?.num_inventaire) lignes.push(`• N° inventaire : ${extra.num_inventaire}`)
+  lignes.push(
     `• Localisation : ${localisation(s)}`,
     `• Problème     : ${s.probleme}`,
-  ]
+  )
   if (s.description) lignes.push(`• Détails      : ${s.description}`)
   lignes.push(
     `• Signalé par  : ${s.enseignant_nom}, le ${date}`,

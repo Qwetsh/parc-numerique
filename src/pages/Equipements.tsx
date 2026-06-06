@@ -50,7 +50,7 @@ export function Equipements() {
       if (vieux && age(e.annee) <= 5) return false
       if (q) {
         const needle = q.toLowerCase()
-        const hay = `${e.reference} ${e.modele} ${e.salleNom} ${e.salle} ${e.type}`.toLowerCase()
+        const hay = `${e.reference} ${e.modele} ${e.salleNom} ${e.salle} ${e.type} ${e.numero_serie ?? ''} ${e.num_inventaire ?? ''}`.toLowerCase()
         if (!hay.includes(needle)) return false
       }
       return true
@@ -200,6 +200,10 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
   const [etat, setEtat] = useState<EtatKey>(initial?.etat ?? 'fonctionnel')
   const [annee, setAnnee] = useState<number>(initial?.annee ?? ANNEE_REF)
   const [proprietaire, setProprietaire] = useState(initial?.proprietaire ?? 'Conseil départemental')
+  const [serie, setSerie] = useState(initial?.numero_serie ?? '')
+  const [inventaire, setInventaire] = useState(initial?.num_inventaire ?? '')
+  const [os, setOs] = useState(initial?.os ?? '')
+  const [notes, setNotes] = useState(initial?.notes ?? '')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -213,6 +217,10 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
     const input = {
       reference, type, modele: modele.trim(), annee, etat,
       salle: num, etage: etg, proprietaire: proprietaire.trim() || 'Conseil départemental',
+      numero_serie: serie.trim() || null,
+      num_inventaire: inventaire.trim() || null,
+      os: os.trim() || null,
+      notes: notes.trim() || null,
     }
     try {
       if (isEdit) await updateEquip(initial!.id, input)
@@ -295,9 +303,38 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
             </label>
           </div>
 
+          <div className="ef-row">
+            <label className="ef-field">
+              <span>Numéro de série</span>
+              <input value={serie} onChange={(e) => setSerie(e.target.value)} placeholder="ex. 5CG1234ABC" />
+            </label>
+            <label className="ef-field">
+              <span>N° inventaire (dépt.)</span>
+              <input value={inventaire} onChange={(e) => setInventaire(e.target.value)} placeholder="étiquette CD57" />
+            </label>
+          </div>
+
+          <div className="ef-row">
+            <label className="ef-field">
+              <span>Système d’exploitation</span>
+              <input value={os} onChange={(e) => setOs(e.target.value)} placeholder="ex. Windows 11" list="ef-os-list" />
+              <datalist id="ef-os-list">
+                <option value="Windows 11" />
+                <option value="Windows 10" />
+                <option value="Linux" />
+                <option value="ChromeOS" />
+                <option value="macOS" />
+              </datalist>
+            </label>
+            <label className="ef-field">
+              <span>Propriétaire</span>
+              <input value={proprietaire} onChange={(e) => setProprietaire(e.target.value)} />
+            </label>
+          </div>
+
           <label className="ef-field">
-            <span>Propriétaire</span>
-            <input value={proprietaire} onChange={(e) => setProprietaire(e.target.value)} />
+            <span>Observations</span>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="remarques, historique, emplacement précis…" />
           </label>
 
           {!isEdit && (

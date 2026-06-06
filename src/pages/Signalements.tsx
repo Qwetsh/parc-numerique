@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Topbar } from '../components/Topbar'
 import { ETAGE_COURT } from '../data/parc'
 import {
-  STATUT_LABEL, listSignalements, setStatut,
+  STATUT_LABEL, getEquipement, listSignalements, setStatut,
 } from '../lib/signalements'
 import type { Signalement, Statut } from '../lib/signalements'
+import type { EquipExtra } from '../lib/reparation'
 import { buildCorps, buildObjet, composeMessage, loadSettings, saveSettings } from '../lib/reparation'
 import type { ReparationSettings } from '../lib/reparation'
 import './Signalements.css'
@@ -124,13 +125,25 @@ export function Signalements() {
    ============================================================ */
 function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void }) {
   const [settings, setSettings] = useState<ReparationSettings>(loadSettings)
+  const [extra, setExtra] = useState<EquipExtra | null>(null)
   const [objet, setObjet] = useState(() => buildObjet(s))
   const [corps, setCorps] = useState(() => buildCorps(s, settings.signature))
   const [copied, setCopied] = useState(false)
 
+  // récupère n° de série / inventaire sur la fiche équipement pour enrichir le message
+  useEffect(() => {
+    let alive = true
+    if (s.equipement_id) {
+      getEquipement(s.equipement_id)
+        .then((e) => { if (alive) setExtra(e ? { numero_serie: e.numero_serie, num_inventaire: e.num_inventaire } : null) })
+        .catch(() => { if (alive) setExtra(null) })
+    } else setExtra(null)
+    return () => { alive = false }
+  }, [s])
+
   useEffect(() => { setObjet(buildObjet(s)) }, [s])
-  // régénère le corps quand le signalement ou la signature mémorisée change
-  useEffect(() => { setCorps(buildCorps(s, settings.signature)) }, [s, settings.signature])
+  // régénère le corps quand le signalement, la signature ou les détails équipement changent
+  useEffect(() => { setCorps(buildCorps(s, settings.signature, extra ?? undefined)) }, [s, settings.signature, extra])
 
   function patch(p: Partial<ReparationSettings>) {
     const next = { ...settings, ...p }
