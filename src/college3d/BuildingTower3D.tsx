@@ -13,14 +13,14 @@ import { Link } from 'react-router-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Edges, Html, OrbitControls, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import { buildFloor, corridorRect, PLINTH_RECT, TOTAL_X, TOTAL_Y } from './geometry'
+import { buildFloor, corridorRect, PLINTH_RECT } from './geometry'
 import type { RoomSolid, Solid } from './geometry'
 import { CORR_FILL, PLINTH_SHADE, SHADE, STAIR_SHADE } from './shades'
 import { Badge } from '../components/Badge'
 import {
   ETAGE_COURT, ETAGE_LABEL, SALLES, nbPostes, santeSalle,
 } from '../data/parc'
-import type { EquipGroupe, Salle, SanteKey } from '../data/parc'
+import type { EquipGroupe, Salle } from '../data/parc'
 import './BuildingTower3D.css'
 
 const FLOORS = [0, 1, 2, 3]
