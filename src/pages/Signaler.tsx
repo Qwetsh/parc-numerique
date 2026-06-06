@@ -63,7 +63,7 @@ export function Signaler() {
           <div className="sg-logo"><EquipIcon type="PC fixe" size={18} /></div>
           <div>
             <div className="sg-title">Signaler une panne</div>
-            <div className="sg-sub">Collège Jean-Moulin · Parc numérique</div>
+            <div className="sg-sub">Collège Pierre Mendès France · Woippy</div>
           </div>
         </div>
 

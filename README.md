@@ -1,4 +1,4 @@
-# Parc numérique — Collège Jean-Moulin
+# Parc numérique — Collège Pierre Mendès France
 
 [![Déploiement GitHub Pages](https://github.com/Qwetsh/parc-numerique/actions/workflows/deploy.yml/badge.svg)](https://github.com/Qwetsh/parc-numerique/actions/workflows/deploy.yml)
 

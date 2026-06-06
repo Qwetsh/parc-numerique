@@ -15,7 +15,7 @@ export function Sidebar() {
         </div>
         <div>
           <div className="brand-name">Parc numérique</div>
-          <div className="brand-sub">Collège Jean-Moulin</div>
+          <div className="brand-sub">Collège Pierre Mendès France</div>
         </div>
       </div>
 
