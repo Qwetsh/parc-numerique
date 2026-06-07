@@ -10,6 +10,7 @@ import { ETAGE_LABEL } from '../data/parc'
 import type { Equipement } from '../data/parc'
 import { faqFor } from '../data/faq'
 import { PROBLEMES, createSignalement, getEquipement } from '../lib/signalements'
+import { notifySignalement } from '../lib/notify'
 import './Signaler.css'
 
 type Phase = 'loading' | 'ready' | 'notfound' | 'error' | 'done'
@@ -48,6 +49,18 @@ export function Signaler() {
         description: description.trim(),
         enseignant_nom: nom.trim(),
         enseignant_email: email.trim() || null,
+      })
+      // notifie le référent par email (sans bloquer ni faire échouer le signalement)
+      const showNum = equip ? equip.salleNom !== `Salle ${equip.salle}` : false
+      void notifySignalement({
+        equipement: equip ? `${equip.type} — ${equip.modele} (${equip.reference})` : '—',
+        salle: equip ? `${equip.salleNom}${showNum ? ` (${equip.salle})` : ''} · ${ETAGE_LABEL[equip.etage]}` : '—',
+        probleme,
+        details: description.trim() || '—',
+        enseignant: nom.trim(),
+        email: email.trim() || '—',
+        date: new Date().toLocaleString('fr-FR'),
+        lien: `${window.location.origin}${import.meta.env.BASE_URL}signalements`,
       })
       setPhase('done')
     } catch (e) {
