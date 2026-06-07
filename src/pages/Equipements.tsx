@@ -8,6 +8,7 @@ import {
 } from '../data/parc'
 import type { Equipement, EtatKey } from '../data/parc'
 import { useParc } from '../data/parcStore'
+import { QrSheet } from '../components/QrSheet'
 import './Equipements.css'
 
 type SortKey = 'reference' | 'type' | 'salle' | 'etage' | 'annee' | 'etat'
@@ -38,6 +39,7 @@ export function Equipements() {
   const [sortDir, setSortDir] = useState<1 | -1>(1)
   // null = panneau fermé ; 'new' = ajout ; sinon = édition de cet équipement
   const [form, setForm] = useState<Equipement | 'new' | null>(null)
+  const [showQr, setShowQr] = useState(false)
 
   const types = useMemo(() => [...new Set(equipements.map((e) => e.type))], [equipements])
 
@@ -83,6 +85,7 @@ export function Equipements() {
     <main className="main">
       <Topbar title="Équipements" sub="Inventaire complet du parc">
         <button className="btn btn-ghost"><IconExport size={16} /> Exporter</button>
+        <button className="btn btn-ghost" onClick={() => setShowQr(true)}>Étiquettes QR</button>
         <button className="btn btn-primary" onClick={() => setForm('new')}><IconPlus size={16} /> Ajouter</button>
       </Topbar>
 
@@ -181,6 +184,8 @@ export function Equipements() {
           onClose={() => setForm(null)}
         />
       )}
+
+      {showQr && <QrSheet equipements={rows} onClose={() => setShowQr(false)} />}
     </main>
   )
 }

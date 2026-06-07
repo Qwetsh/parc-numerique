@@ -1,0 +1,40 @@
+/* Planche QR imprimable */
+.qr-print-root {
+  position: fixed; inset: 0; z-index: 200; background: #fff;
+  overflow: auto; display: flex; flex-direction: column;
+}
+.qr-toolbar {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 22px; border-bottom: 1px solid var(--line); background: var(--surface);
+}
+.qr-toolbar-info { font-size: var(--fs-sm); color: var(--ink-600); }
+.qr-toolbar-info strong { color: var(--ink-900); }
+.qr-warn { color: var(--warn-ink); font-size: var(--fs-xs); }
+.qr-toolbar-actions { display: flex; gap: 10px; flex: none; }
+
+.qr-sheet {
+  width: 210mm; max-width: 100%; margin: 16px auto; padding: 10mm;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm;
+  background: #fff;
+}
+.qr-label {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px dashed #c2ccda; border-radius: 8px; padding: 8px 9px;
+  break-inside: avoid;
+}
+.qr-label svg { flex: none; width: 96px; height: 96px; }
+.qr-label-info { min-width: 0; }
+.qr-label-ref { font-weight: 700; font-size: 13px; color: #0f172a; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.qr-label-salle { font-size: 11px; color: #475569; margin-top: 2px; }
+.qr-label-cta { font-size: 9px; color: #1d4ed8; font-weight: 600; margin-top: 7px; line-height: 1.25; }
+.qr-label-foot { font-size: 8px; color: #94a3b8; margin-top: 3px; }
+
+@media print {
+  #root { display: none !important; }
+  .qr-print-root { position: static; overflow: visible; }
+  .qr-toolbar { display: none !important; }
+  .qr-sheet { width: auto; max-width: none; margin: 0; padding: 0; gap: 5mm; }
+  .qr-label { border-color: #c2ccda; }
+  @page { size: A4; margin: 10mm; }
+}
