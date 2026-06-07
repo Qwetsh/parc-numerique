@@ -11,6 +11,7 @@ import type { Equipement } from '../data/parc'
 import { faqFor } from '../data/faq'
 import { PROBLEMES, createSignalement, getEquipement } from '../lib/signalements'
 import { notifySignalement } from '../lib/notify'
+import { pageUrl } from '../lib/site'
 import './Signaler.css'
 
 type Phase = 'loading' | 'ready' | 'notfound' | 'error' | 'done'
@@ -60,7 +61,7 @@ export function Signaler() {
         enseignant: nom.trim(),
         email: email.trim() || '—',
         date: new Date().toLocaleString('fr-FR'),
-        lien: `${window.location.origin}${import.meta.env.BASE_URL}signalements`,
+        lien: pageUrl('signalements'),
       })
       setPhase('done')
     } catch (e) {

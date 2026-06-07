@@ -8,15 +8,16 @@ import { createPortal } from 'react-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { ETAGE_COURT } from '../data/parc'
 import type { Equipement } from '../data/parc'
+import { pageUrl, usesLocalUrl } from '../lib/site'
 import './QrSheet.css'
 
-/** URL publique de signalement (absolue, basée sur l'origine courante). */
+/** URL publique de signalement pour un équipement (toujours vers le site déployé). */
 export function signalerUrl(id: string): string {
-  return `${window.location.origin}${import.meta.env.BASE_URL}signaler/${id}`
+  return pageUrl(`signaler/${id}`)
 }
 
 export function QrSheet({ equipements, onClose }: { equipements: Equipement[]; onClose: () => void }) {
-  const local = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const local = usesLocalUrl
 
   return createPortal(
     <div className="qr-print-root">
