@@ -13,3 +13,8 @@ dist-ssr
 _bmad/
 _bmad-output/
 docs/
+
+# Sources de données réelles / audit interne (ne pas publier — contiennent n° de série, audit)
+*.xlsx
+*.pptx
+*.pdf
