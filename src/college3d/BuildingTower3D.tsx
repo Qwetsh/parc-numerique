@@ -18,7 +18,7 @@ import type { RoomSolid, Solid } from './geometry'
 import { CORR_FILL, PLINTH_SHADE, SHADE, STAIR_SHADE } from './shades'
 import { Badge } from '../components/Badge'
 import { ETAGE_COURT, ETAGE_LABEL, SALLES } from '../data/parc'
-import type { Equipement, Salle } from '../data/parc'
+import type { Salle } from '../data/parc'
 import { useParc } from '../data/parcStore'
 import './BuildingTower3D.css'
 
@@ -350,18 +350,6 @@ function Scene({ zoom, ...props }: SceneProps) {
 }
 
 /* ---------------- détail salle (overlay DOM) ---------------- */
-interface EquipGroup { type: string; modele: string; etat: string; n: number }
-/** Regroupe les équipements (en direct) par type+modèle+état avec un compteur. */
-function groupItems(items: Equipement[]): EquipGroup[] {
-  const g: Record<string, EquipGroup> = {}
-  items.forEach((e) => {
-    const k = `${e.type}|${e.modele}|${e.etat}`
-    if (!g[k]) g[k] = { type: e.type, modele: e.modele, etat: e.etat, n: 0 }
-    g[k].n += 1
-  })
-  return Object.values(g)
-}
-
 const ETAT_DOT: Record<string, string> = {
   fonctionnel: 'var(--ok-solid)', vetuste: 'var(--warn-solid)', panne: 'var(--bad-solid)', reforme: 'var(--gone-solid)',
 }
@@ -370,7 +358,7 @@ function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
   const { equipOf, santeSalle } = useParc()
   const items = equipOf(salle.etage, salle.num)
   const sante = santeSalle(salle.etage, salle.num)
-  const groups = groupItems(items)
+  const liste = items.slice().sort((a, b) => a.reference.localeCompare(b.reference, 'fr', { numeric: true }))
   const total = items.length
   return (
     <div className="tw-detail">
@@ -386,13 +374,13 @@ function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
         <Badge sante={sante} />
         {total > 0 && <span className="tw-detail-postes">{total} poste{total > 1 ? 's' : ''}</span>}
       </div>
-      {groups.length > 0 ? (
+      {liste.length > 0 ? (
         <div className="tw-detail-eq">
-          {groups.map((g, i) => (
-            <div className="tw-eq-row" key={i}>
-              <span className="tw-eq-dot" style={{ background: ETAT_DOT[g.etat] }} />
-              <span className="tw-eq-t">{g.type}{g.n > 1 && <b> ×{g.n}</b>}</span>
-              <span className="tw-eq-m">{g.modele}</span>
+          {liste.map((e) => (
+            <div className="tw-eq-row" key={e.id}>
+              <span className="tw-eq-dot" style={{ background: ETAT_DOT[e.etat] }} />
+              <span className="tw-eq-t">{e.reference}</span>
+              <span className="tw-eq-m">{e.type} · {e.modele}</span>
             </div>
           ))}
         </div>
