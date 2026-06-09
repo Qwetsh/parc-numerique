@@ -3,10 +3,14 @@ import {
   IconBuilding, IconDashboard, IconMemory, IconMonitor,
   IconPalette, IconRequest, IconSoftware, IconTicket,
 } from './Icon'
+import { useParc } from '../data/parcStore'
 
 const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'active' : undefined)
 
 export function Sidebar() {
+  const { signalementsActifs } = useParc()
+  const nbSignalements = signalementsActifs.length
+
   return (
     <aside className="side">
       <div className="brand">
@@ -32,6 +36,9 @@ export function Sidebar() {
         </NavLink>
         <NavLink to="/signalements" className={linkClass}>
           <IconTicket /> Signalements
+          {nbSignalements > 0 && (
+            <span className="nav-badge" title={`${nbSignalements} signalement(s) à traiter`}>{nbSignalements}</span>
+          )}
         </NavLink>
       </nav>
 

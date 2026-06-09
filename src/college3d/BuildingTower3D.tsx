@@ -15,7 +15,7 @@ import { Edges, Html, OrbitControls, Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { buildFloor, corridorRect, PLINTH_RECT } from './geometry'
 import type { RoomSolid, Solid } from './geometry'
-import { CORR_FILL, PLINTH_SHADE, SHADE, STAIR_SHADE } from './shades'
+import { ALERT_SHADE, CORR_FILL, PLINTH_SHADE, SHADE, STAIR_SHADE } from './shades'
 import { Badge } from '../components/Badge'
 import { ETAGE_COURT, ETAGE_LABEL, SALLES } from '../data/parc'
 import type { Salle } from '../data/parc'
@@ -51,9 +51,11 @@ interface TowerRoomProps {
 
 function TowerRoom({ solid, selected, interactive, onSelect }: TowerRoomProps) {
   const { salle, x, z, w, d, h } = solid
-  const { santeSalle } = useParc()
+  const { santeSalle, alerteSalle } = useParc()
   const sante = santeSalle(salle.etage, salle.num)
-  const shade = SHADE[sante]
+  const alerte = alerteSalle(salle.etage, salle.num)
+  // Un signalement ouvert prime sur l'état d'inventaire : la salle vire au rouge d'alerte.
+  const shade = alerte ? ALERT_SHADE : SHADE[sante]
   const bw = Math.max(0.4, w - ROOM_GAP)
   const bd = Math.max(0.4, d - ROOM_GAP)
 
@@ -62,11 +64,16 @@ function TowerRoom({ solid, selected, interactive, onSelect }: TowerRoomProps) {
   const roofMat = useRef<THREE.MeshStandardMaterial>(null)
   const [hovered, setHovered] = useState(false)
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!group.current) return
     const targetY = selected ? 0.5 : interactive && hovered ? 0.14 : 0
     group.current.position.y += (targetY - group.current.position.y) * 0.16
-    const emis = selected ? 0.38 : interactive && hovered ? 0.2 : 0.05
+    let emis = selected ? 0.38 : interactive && hovered ? 0.2 : 0.05
+    // Salle en alerte : halo lumineux qui pulse pour être repéré d'un coup d'œil.
+    if (alerte && !selected) {
+      const pulse = 0.5 + 0.5 * Math.sin(state.clock.elapsedTime * 3)
+      emis = Math.max(emis, 0.3 + pulse * 0.4)
+    }
     for (const m of [bodyMat.current, roofMat.current]) {
       if (m) m.emissiveIntensity += (emis - m.emissiveIntensity) * 0.16
     }
@@ -147,7 +154,7 @@ function FloorGroup({
   const group = useRef<THREE.Group>(null)
   const slabMat = useRef<THREE.MeshStandardMaterial>(null)
   const opacity = useRef(0)
-  const { santeSalle } = useParc()
+  const { santeSalle, alerteSalle } = useParc()
 
   const isFocused = focused === etage
   const isDimmed = focused !== null && !isFocused
@@ -160,9 +167,13 @@ function FloorGroup({
   const summary = useMemo(() => {
     const salles = SALLES.filter((s) => s.etage === etage)
     const c: Record<string, number> = { panne: 0, vetuste: 0, fonctionnel: 0 }
-    salles.forEach((s) => { const k = santeSalle(s.etage, s.num); if (k in c) c[k]++ })
-    return { total: salles.length, c }
-  }, [etage, santeSalle])
+    let alertes = 0
+    salles.forEach((s) => {
+      const k = santeSalle(s.etage, s.num); if (k in c) c[k]++
+      if (alerteSalle(s.etage, s.num)) alertes++
+    })
+    return { total: salles.length, c, alertes }
+  }, [etage, santeSalle, alerteSalle])
 
   const baseY = floorBaseY(etage)
 
@@ -282,6 +293,7 @@ function FloorGroup({
         >
           <span className="tw-chip-code">{ETAGE_COURT[etage]}</span>
           <span className="tw-chip-dots">
+            {summary.alertes > 0 && <i className="alert" title={`${summary.alertes} salle(s) avec signalement`} />}
             {summary.c.panne > 0 && <i className="bad" title={`${summary.c.panne} en panne`} />}
             {summary.c.vetuste > 0 && <i className="warn" title={`${summary.c.vetuste} vétuste`} />}
             {summary.c.fonctionnel > 0 && <i className="ok" />}
@@ -355,9 +367,10 @@ const ETAT_DOT: Record<string, string> = {
 }
 
 function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
-  const { equipOf, santeSalle } = useParc()
+  const { equipOf, santeSalle, signalementsOf } = useParc()
   const items = equipOf(salle.etage, salle.num)
   const sante = santeSalle(salle.etage, salle.num)
+  const signalements = signalementsOf(salle.etage, salle.num)
   const liste = items.slice().sort((a, b) => a.reference.localeCompare(b.reference, 'fr', { numeric: true }))
   const total = items.length
   return (
@@ -371,9 +384,30 @@ function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
         </div>
       </div>
       <div className="tw-detail-tags">
+        {signalements.length > 0 && (
+          <span className="tw-detail-alert-chip">⚠ {signalements.length} signalement{signalements.length > 1 ? 's' : ''}</span>
+        )}
         <Badge sante={sante} />
         {total > 0 && <span className="tw-detail-postes">{total} poste{total > 1 ? 's' : ''}</span>}
       </div>
+
+      {signalements.length > 0 && (
+        <div className="tw-detail-sgs">
+          {signalements.map((s) => (
+            <div className="tw-sg-row" key={s.id}>
+              <div className="tw-sg-top">
+                <span className="tw-sg-pb">{s.probleme}</span>
+                {s.equipement_ref && <span className="tw-sg-ref">{s.equipement_ref}</span>}
+              </div>
+              {s.description && <p className="tw-sg-desc">{s.description}</p>}
+              <div className="tw-sg-meta">
+                {s.enseignant_nom} · {new Date(s.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          ))}
+          <Link className="tw-sg-link" to="/signalements">Gérer les signalements →</Link>
+        </div>
+      )}
       {liste.length > 0 ? (
         <div className="tw-detail-eq">
           {liste.map((e) => (
