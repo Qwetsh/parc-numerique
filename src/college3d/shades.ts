@@ -18,6 +18,10 @@ export const SHADE: Record<SanteKey, Shade> = {
   none: { top: '#eef2f7', mid: '#dfe6ee', dark: '#d0d9e4', line: '#c4cedb', glyph: '·' },
 }
 
+/** Salle avec ≥1 signalement de panne non résolu : rouge vif d'alerte, distinct
+ *  du « panne » d'inventaire (rose doux). Prioritaire sur la couleur de santé. */
+export const ALERT_SHADE: Shade = { top: '#fee2e2', mid: '#ef4444', dark: '#c81e1e', line: '#b91c1c', glyph: '!' }
+
 export const PLINTH_SHADE = { top: '#eef2f7', mid: '#dbe2ec', dark: '#c8d2df' }
 export const CORR_FILL = '#e4eaf2'
 export const STAIR_SHADE: Shade = { top: '#dde4ee', mid: '#c4cedd', dark: '#b2bed0', line: '#9aa7bb', glyph: '' }
