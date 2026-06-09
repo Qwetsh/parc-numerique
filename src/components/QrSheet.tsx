@@ -42,6 +42,9 @@ export function QrSheet({ equipements, onClose }: { equipements: Equipement[]; o
               <QRCodeSVG value={signalerUrl(e.id)} size={96} level="M" />
               <div className="qr-label-info">
                 <div className="qr-label-ref">{e.reference}</div>
+                {e.num_inventaire && (
+                  <div className="qr-label-inv">Inv. {e.num_inventaire}</div>
+                )}
                 <div className="qr-label-salle">
                   {showNum ? `${e.salleNom} · ${e.salle}` : e.salleNom} · {ETAGE_COURT[e.etage]}
                 </div>
