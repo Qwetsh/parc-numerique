@@ -10,7 +10,7 @@ import { ETAGE_LABEL } from '../data/parc'
 import type { Equipement } from '../data/parc'
 import { faqFor } from '../data/faq'
 import { PROBLEMES, createSignalement, getEquipement } from '../lib/signalements'
-import { notifySignalement } from '../lib/notify'
+import { notifyConfigured, notifySignalement } from '../lib/notify'
 import { pageUrl } from '../lib/site'
 import './Signaler.css'
 
@@ -27,6 +27,7 @@ export function Signaler() {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [emailWarn, setEmailWarn] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -51,9 +52,11 @@ export function Signaler() {
         enseignant_nom: nom.trim(),
         enseignant_email: email.trim() || null,
       })
-      // notifie le référent par email (sans bloquer ni faire échouer le signalement)
+      // Notifie le référent par email. On ATTEND la fin de l'envoi (pour qu'il
+      // ne soit pas annulé si la page se ferme) sans bloquer l'enregistrement
+      // déjà fait. La notification fiable est doublée côté serveur (Edge Function).
       const showNum = equip ? equip.salleNom !== `Salle ${equip.salle}` : false
-      void notifySignalement({
+      const sent = await notifySignalement({
         equipement: equip ? `${equip.type} — ${equip.modele} (${equip.reference})` : '—',
         salle: equip ? `${equip.salleNom}${showNum ? ` (${equip.salle})` : ''} · ${ETAGE_LABEL[equip.etage]}` : '—',
         probleme,
@@ -63,6 +66,8 @@ export function Signaler() {
         date: new Date().toLocaleString('fr-FR'),
         lien: pageUrl('signalements'),
       })
+      // Avertit seulement si l'email était censé partir mais a échoué.
+      setEmailWarn(notifyConfigured && !sent)
       setPhase('done')
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Erreur lors de l’envoi.')
@@ -94,9 +99,12 @@ export function Signaler() {
           <div className="sg-done">
             <div className="sg-check">✓</div>
             <h2>Merci !</h2>
-            <p>Votre signalement a bien été envoyé. Le référent numérique le prendra en charge.</p>
+            <p>Votre signalement a bien été enregistré. Le référent numérique le prendra en charge.</p>
+            {emailWarn && (
+              <p className="sg-warn">⚠ Le signalement est bien enregistré, mais l’email d’alerte n’a pas pu partir depuis cet appareil. Le référent le verra malgré tout dans son outil.</p>
+            )}
             <button className="btn btn-ghost" onClick={() => {
-              setProbleme(PROBLEMES[0]); setDescription(''); setNom(''); setEmail(''); setBusy(false); setPhase('ready')
+              setProbleme(PROBLEMES[0]); setDescription(''); setNom(''); setEmail(''); setBusy(false); setEmailWarn(false); setPhase('ready')
             }}>Faire un autre signalement</button>
           </div>
         )}

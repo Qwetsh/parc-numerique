@@ -24,14 +24,18 @@ export interface NotifyParams {
   lien: string
 }
 
-/** Envoie la notification. N'échoue jamais bruyamment : un email raté ne doit
- *  pas casser le signalement déjà enregistré. */
-export async function notifySignalement(params: NotifyParams): Promise<void> {
-  if (!notifyConfigured) return
+/** Envoie la notification depuis le navigateur (best-effort).
+ *  Renvoie `true` si l'email est parti, `false` sinon (non configuré, bloqué
+ *  par une extension, réseau…). N'échoue jamais bruyamment : un email raté ne
+ *  doit pas casser le signalement déjà enregistré, mais l'appelant peut prévenir
+ *  l'utilisateur. La notification fiable reste celle déclenchée côté serveur. */
+export async function notifySignalement(params: NotifyParams): Promise<boolean> {
+  if (!notifyConfigured) return false
   try {
     await emailjs.send(SERVICE, TEMPLATE, { ...params }, { publicKey: PUBLIC_KEY })
+    return true
   } catch (e) {
-    // on log mais on n'interrompt pas le flux utilisateur
     console.warn('Notification email non envoyée :', e)
+    return false
   }
 }
