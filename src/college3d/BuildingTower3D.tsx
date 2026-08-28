@@ -414,7 +414,7 @@ function RoomDetail({ salle, onClose }: { salle: Salle; onClose: () => void }) {
             <div className="tw-eq-row" key={e.id}>
               <span className="tw-eq-dot" style={{ background: ETAT_DOT[e.etat] }} />
               <span className="tw-eq-t">{e.reference}</span>
-              <span className="tw-eq-m">{e.type} · {e.modele}</span>
+              <span className="tw-eq-m">{e.modele ? `${e.type} · ${e.modele}` : e.type}</span>
             </div>
           ))}
         </div>

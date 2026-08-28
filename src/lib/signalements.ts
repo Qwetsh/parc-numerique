@@ -60,7 +60,7 @@ export interface EquipementPublic {
   id: string
   reference: string
   type: string
-  modele: string
+  modele: string | null
   salle: string
   etage: number
   salleNom: string

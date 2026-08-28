@@ -124,24 +124,46 @@ export const IconClose = (p: IconProps) => (
   </Svg>
 )
 
+export const IconClipboard = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4V3h6v1M9 10h6M9 14h4" />
+  </Svg>
+)
+
 export const IconCheck = (p: IconProps) => (
   <Svg strokeWidth={3} {...p}>
     <path d="m5 12 5 5L20 7" />
   </Svg>
 )
 
-/* Icônes par type d'équipement */
+/* Icônes par type d'équipement. Les clés doivent correspondre aux libellés
+   de TYPES_MATERIEL (data/parc.ts) ; un type sans icône dédiée retombe sur
+   ICON_MATERIEL_DEFAUT plutôt que sur un carré vide. */
 export const EQUIP_ICON: Record<string, React.ReactNode> = {
   'PC fixe': (<><rect x="2.5" y="4" width="19" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></>),
   'PC portable': (<><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M2 20h20" /></>),
   'Visualiseur': (<><path d="M12 3v6m0 0-2.5-2M12 9l2.5-2" /><rect x="4" y="13" width="16" height="8" rx="2" /></>),
   'VPI': (<><rect x="2" y="7" width="20" height="10" rx="2" /><path d="M7 21h10M12 17v4" /></>),
+  'TBI': (<><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M12 17v4M8 21h8M6 8h7" /></>),
+  'Écran': (<><rect x="2.5" y="4" width="19" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></>),
+  'Imprimante': (<><path d="M6 9V3h12v6" /><rect x="3" y="9" width="18" height="7" rx="2" /><path d="M7 16h10v5H7z" /></>),
+  'Tablette': (<><rect x="5" y="2.5" width="14" height="19" rx="2" /><path d="M11 18.5h2" /></>),
+  'Borne wifi': (<><path d="M5 12.5a9.5 9.5 0 0 1 14 0M8 16a5 5 0 0 1 8 0" /><circle cx="12" cy="19.5" r="1.2" /></>),
+  'Serveur': (<><rect x="3" y="4" width="18" height="7" rx="2" /><rect x="3" y="13" width="18" height="7" rx="2" /><path d="M7 7.5h.01M7 16.5h.01" /></>),
+  'Switch réseau': (<><rect x="2" y="8" width="20" height="8" rx="2" /><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01" /></>),
+  'Enceintes': (<><rect x="6" y="2.5" width="12" height="19" rx="2" /><circle cx="12" cy="15" r="3" /><circle cx="12" cy="7" r="1.2" /></>),
 }
+
+/** Repli : matériel dont le type n'a pas d'icône dédiée. */
+const ICON_MATERIEL_DEFAUT = (
+  <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h6" /></>
+)
 
 export function EquipIcon({ type, size = 16 }: { type: string; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      {EQUIP_ICON[type] ?? null}
+      {EQUIP_ICON[type] ?? ICON_MATERIEL_DEFAUT}
     </svg>
   )
 }

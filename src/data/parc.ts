@@ -41,8 +41,8 @@ export interface Equipement {
   id: string          // uuid (clé primaire Supabase)
   reference: string   // code affiché (ex. PC-FIX-205-01)
   type: string
-  modele: string
-  annee: number
+  modele: string | null // inconnu tant que la fiche n'est pas complétée
+  annee: number | null  // idem — un relevé de salle ne connaît pas l'année d'achat
   etat: EtatKey
   salle: string       // numéro de salle
   salleNom: string    // dérivé des métadonnées de salle
@@ -53,6 +53,42 @@ export interface Equipement {
   num_inventaire: string | null // n° d'inventaire / étiquette département
   os: string | null             // système d'exploitation
   notes: string | null          // observations libres
+}
+
+/* ============================================================
+   Catalogue des types de matériel, dans l'ordre où on les rencontre
+   en faisant le tour d'une salle. Sert au relevé de terrain et à la
+   génération des références (préfixe + salle + numéro d'ordre).
+   ============================================================ */
+export interface TypeMateriel {
+  /** Libellé affiché et stocké dans parc_equipements.type */
+  label: string
+  /** Préfixe de référence, ex. VID → VID-204-01 */
+  prefixe: string
+}
+
+export const TYPES_MATERIEL: TypeMateriel[] = [
+  { label: 'PC fixe', prefixe: 'PC-FIX' },
+  { label: 'VPI', prefixe: 'VPI' },
+  { label: 'TBI', prefixe: 'TBI' },
+  { label: 'Écran', prefixe: 'ECR' },
+  { label: 'Imprimante', prefixe: 'IMP' },
+  { label: 'Visualiseur', prefixe: 'VISU' },
+  { label: 'PC portable', prefixe: 'PC-PORT' },
+  { label: 'Tablette', prefixe: 'TAB' },
+  { label: 'Enceintes', prefixe: 'SON' },
+  { label: 'Borne wifi', prefixe: 'WIFI' },
+  { label: 'Switch réseau', prefixe: 'SW' },
+  { label: 'Serveur', prefixe: 'SRV' },
+]
+
+/** Libellés seuls, pour les listes déroulantes. */
+export const TYPES_EQUIP: string[] = TYPES_MATERIEL.map((t) => t.label)
+
+/** Préfixe de référence d'un type (repli : les 3 premières lettres). */
+export function prefixeType(type: string): string {
+  const t = TYPES_MATERIEL.find((x) => x.label === type)
+  return t ? t.prefixe : type.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, '') || 'EQ'
 }
 
 export const ETATS: Record<EtatKey, EtatDef> = {
@@ -234,10 +270,6 @@ export interface EquipSeed {
   notes: string | null
 }
 
-const PREFIX: Record<string, string> = {
-  'PC fixe': 'PC-FIX', 'PC portable': 'PC-PORT', 'Visualiseur': 'VISU', 'VPI': 'VPI', 'Tablette': 'TAB',
-}
-
 export const SEED_EQUIPEMENTS: EquipSeed[] = [
   { reference: 'PC-FIX-110-01', type: 'PC fixe', modele: 'Poste standard PNC-NG (i3-12100)', annee: 2023, etat: 'fonctionnel', salle: '110', etage: 0, proprietaire: 'Conseil départemental', numero_serie: 'CZC3227DVS', num_inventaire: '213.1.01.0002', os: 'Windows 11', notes: "Écran 22\" — inv. 213.1.02.0001 / s/n 3CM24801CJ" },
   { reference: 'PC-FIX-113-01', type: 'PC fixe', modele: 'Poste standard PNC-NG (i3-12100)', annee: 2023, etat: 'fonctionnel', salle: '113', etage: 0, proprietaire: 'Conseil départemental', numero_serie: 'CZC3227DR2', num_inventaire: '213.1.01.0003', os: 'Windows 11', notes: "Écran 22\" — inv. 213.1.02.0003 / s/n 3CM2451075" },
@@ -322,7 +354,7 @@ export const SEED_EQUIPEMENTS: EquipSeed[] = [
 
 /** Génère la prochaine référence libre pour un type+salle (ex. PC-FIX-205-03). */
 export function nextReference(type: string, salle: string, existing: { reference: string }[]): string {
-  const pre = PREFIX[type] || 'EQ'
+  const pre = prefixeType(type)
   const numSafe = String(salle).replace(/\D/g, '') || salle
   const base = `${pre}-${numSafe}-`
   let max = 0
@@ -334,9 +366,6 @@ export function nextReference(type: string, salle: string, existing: { reference
   }
   return `${base}${String(max + 1).padStart(2, '0')}`
 }
-
-/** Types d'équipement proposés dans le formulaire d'ajout. */
-export const TYPES_EQUIP = ['PC fixe', 'PC portable', 'Tablette', 'VPI', 'Visualiseur']
 
 export const ETAGE_LABEL: Record<number, string> = { 0: 'Rez-de-chaussée', 1: '1ᵉʳ étage', 2: '2ᵉ étage', 3: '3ᵉ étage' }
 export const ETAGE_COURT: Record<number, string> = { 0: 'RDC', 1: 'R+1', 2: 'R+2', 3: 'R+3' }

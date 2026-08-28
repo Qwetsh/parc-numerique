@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  IconBuilding, IconDashboard, IconMemory, IconMonitor,
+  IconBuilding, IconClipboard, IconDashboard, IconMemory, IconMonitor,
   IconRequest, IconSoftware, IconTicket,
 } from './Icon'
 import { deconnecter, useAuth } from '../lib/auth'
@@ -49,6 +49,9 @@ export function Sidebar() {
           {nbSignalements > 0 && (
             <span className="nav-badge" title={`${nbSignalements} signalement(s) à traiter`}>{nbSignalements}</span>
           )}
+        </NavLink>
+        <NavLink to="/releve" className={linkClass}>
+          <IconClipboard /> Relevé de terrain
         </NavLink>
       </nav>
 

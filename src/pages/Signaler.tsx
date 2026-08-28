@@ -52,7 +52,7 @@ export function Signaler() {
       // ferme, sans bloquer l'enregistrement déjà fait.
       const showNum = equip ? equip.salleNom !== `Salle ${equip.salle}` : false
       const sent = await notifySignalement({
-        equipement: equip ? `${equip.type} — ${equip.modele} (${equip.reference})` : '—',
+        equipement: equip ? `${equip.type}${equip.modele ? ` — ${equip.modele}` : ''} (${equip.reference})` : '—',
         salle: equip ? `${equip.salleNom}${showNum ? ` (${equip.salle})` : ''} · ${ETAGE_LABEL[equip.etage]}` : '—',
         probleme,
         details: description.trim() || '—',
@@ -107,7 +107,7 @@ export function Signaler() {
             <div className="sg-equip">
               <span className="sg-equip-ic"><EquipIcon type={equip.type} size={20} /></span>
               <div className="sg-equip-meta">
-                <div className="sg-equip-t">{equip.type} · {equip.modele}</div>
+                <div className="sg-equip-t">{equip.modele ? `${equip.type} · ${equip.modele}` : equip.type}</div>
                 <div className="sg-equip-d">
                   {equip.reference} — {equip.salleNom}
                   {equip.salleNom !== `Salle ${equip.salle}` ? ` (${equip.salle})` : ''} · {ETAGE_LABEL[equip.etage]}

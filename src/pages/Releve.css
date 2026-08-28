@@ -1,0 +1,97 @@
+/* Relevé de terrain — mobile d'abord, utilisable d'une main.
+   Cibles tactiles à 44 px minimum, pas de survol requis. */
+.rv-wrap {
+  min-height: 100vh; width: 100%;
+  display: flex; align-items: flex-start; justify-content: center;
+  background: radial-gradient(120% 80% at 50% 0%, #eef3fb 0%, #e7edf6 60%, #e2e9f3 100%);
+  padding: 16px 12px 40px;
+}
+.rv-card {
+  width: 100%; max-width: 520px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg, 18px);
+  box-shadow: var(--sh-md); padding: 16px 14px 20px;
+}
+
+.rv-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.rv-title { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -.01em; }
+.rv-sub { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 1px; }
+.rv-sortie {
+  margin-left: auto; font-size: var(--fs-xs); color: var(--ink-500);
+  text-decoration: none; border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 6px 10px;
+}
+.rv-retour {
+  flex: none; width: 38px; height: 38px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: 22px; line-height: 1; color: var(--ink-600); cursor: pointer;
+}
+
+.rv-info { color: var(--ink-600); font-size: var(--fs-body); padding: 12px 0; }
+.rv-info.rv-bad { color: var(--bad-ink); }
+.rv-err {
+  font-size: var(--fs-sm); color: var(--bad-ink); background: var(--bad-tint);
+  border: 1px solid var(--bad-line); border-radius: var(--r-sm); padding: 9px 12px; margin: 0 0 12px;
+}
+
+/* Sélecteur d'étage */
+.rv-etages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+.rv-etage {
+  font: inherit; font-size: var(--fs-sm); font-weight: 550;
+  height: 44px; border-radius: var(--r-sm); cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-600);
+}
+.rv-etage.on { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
+
+.rv-avancement { font-size: var(--fs-sm); color: var(--ink-600); margin: 0 0 12px; }
+
+/* Liste des salles */
+.rv-salles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rv-salle {
+  width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px;
+  font: inherit; text-align: left; cursor: pointer;
+  padding: 8px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-900);
+}
+.rv-salle.faite { background: var(--ok-tint); border-color: var(--ok-line); }
+.rv-salle-id { font-weight: 600; font-size: var(--fs-body); min-width: 44px; }
+.rv-salle-nom { font-size: var(--fs-sm); color: var(--ink-600); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-salle-n {
+  flex: none; min-width: 26px; height: 26px; padding: 0 8px; border-radius: var(--r-pill);
+  background: var(--brand-600); color: #fff; font-size: var(--fs-xs); font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rv-salle-ok { flex: none; color: var(--ok-ink); display: inline-flex; }
+.rv-salle-vide { flex: none; color: var(--ink-300); font-size: var(--fs-sm); }
+
+/* Compteurs par type de matériel */
+.rv-types { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rv-type {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px 6px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--surface-2);
+}
+.rv-type.on { background: var(--brand-50); border-color: var(--brand-100, #dbe6fb); }
+.rv-type-ic { flex: none; color: var(--ink-500); display: inline-flex; }
+.rv-type.on .rv-type-ic { color: var(--brand-600); }
+.rv-type-nom { flex: 1; min-width: 0; font-size: var(--fs-body); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-type-n {
+  flex: none; min-width: 24px; text-align: center;
+  font-size: var(--fs-body); font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--ink-400);
+}
+.rv-type.on .rv-type-n { color: var(--brand-700); }
+
+.rv-btn {
+  flex: none; width: 44px; height: 44px; border-radius: var(--r-sm);
+  font: inherit; font-size: 22px; line-height: 1; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-700);
+}
+.rv-btn.plus { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
+.rv-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.rv-actions { display: flex; flex-direction: column; gap: 8px; }
+.rv-rien, .rv-suivante { width: 100%; justify-content: center; min-height: 46px; }
+.rv-suivante { flex-direction: column; gap: 1px; line-height: 1.2; }
+.rv-suivante span { font-size: var(--fs-xs); font-weight: 400; opacity: .85; }

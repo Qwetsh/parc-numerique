@@ -245,6 +245,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 .cell-id { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--ink-500); }
 .cell-id .cell-ref { display: block; }
 .cell-id .cell-inv { display: block; font-size: var(--fs-xs); color: var(--ink-400); margin-top: 2px; }
+/* information pas encore renseignée (fiche créée lors d'un relevé de salle) */
+.cell-vide { color: var(--ink-300); font-style: italic; }
 .cell-strong { font-weight: 550; color: var(--ink-900); }
 
 /* utilitaires */

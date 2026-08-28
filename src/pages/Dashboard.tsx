@@ -37,9 +37,14 @@ export function Dashboard() {
   const data = useMemo(() => {
     const eq = equipements
     const total = eq.length
-    const ageMoy = total ? eq.reduce((a, e) => a + (ANNEE_REF - e.annee), 0) / total : 0
-    const vieux = eq.filter((e) => ANNEE_REF - e.annee > 5).length
-    const pctVieux = total ? Math.round((vieux / total) * 100) : 0
+    // L'âge n'est calculé que sur les fiches dont l'année est renseignée :
+    // un matériel relevé sur le terrain n'a pas encore d'année d'achat.
+    const dates = eq.filter((e): e is typeof e & { annee: number } => e.annee != null)
+    const ageMoy = dates.length
+      ? dates.reduce((a, e) => a + (ANNEE_REF - e.annee), 0) / dates.length
+      : 0
+    const vieux = dates.filter((e) => ANNEE_REF - e.annee > 5).length
+    const pctVieux = dates.length ? Math.round((vieux / dates.length) * 100) : 0
     const enPanne = eq.filter((e) => e.etat === 'panne').length
 
     const counts: Record<EtatKey, number> = { fonctionnel: 0, vetuste: 0, panne: 0, reforme: 0 }
@@ -63,7 +68,7 @@ export function Dashboard() {
     const types = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])
     const maxType = Math.max(1, ...Object.values(typeCounts))
 
-    return { total, ageMoy, vieux, pctVieux, enPanne, counts, maxFloor, floors, watch, types, maxType }
+    return { total, datees: dates.length, ageMoy, vieux, pctVieux, enPanne, counts, maxFloor, floors, watch, types, maxType }
   }, [equipements, santeSalle, equipOf])
 
   const kpis: Kpi[] = [
@@ -77,7 +82,9 @@ export function Dashboard() {
       label: 'Âge moyen du parc',
       num: <>{data.ageMoy.toFixed(1)}<small> ans</small></>,
       icon: <IconClock />,
-      foot: <span className="trend down"><IconArrowUp size={12} /> renouvelé en 2024</span>,
+      foot: data.datees < data.total
+        ? <span>sur {data.datees} fiche{data.datees > 1 ? 's' : ''} datée{data.datees > 1 ? 's' : ''} / {data.total}</span>
+        : <span className="trend down"><IconArrowUp size={12} /> renouvelé en 2024</span>,
     },
     {
       label: 'Matériel de + de 5 ans',

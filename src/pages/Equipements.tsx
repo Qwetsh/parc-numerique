@@ -44,15 +44,16 @@ export function Equipements() {
   const types = useMemo(() => [...new Set(equipements.map((e) => e.type))], [equipements])
 
   const rows = useMemo(() => {
-    const age = (annee: number) => ANNEE_REF - annee
+    const age = (annee: number | null) => (annee == null ? null : ANNEE_REF - annee)
     const r = equipements.filter((e) => {
       if (type && e.type !== type) return false
       if (etat && e.etat !== etat) return false
       if (etage !== '' && String(e.etage) !== etage) return false
-      if (vieux && age(e.annee) <= 5) return false
+      // Sans année connue, on ne peut pas affirmer que le matériel a plus de 5 ans.
+      if (vieux) { const a = age(e.annee); if (a == null || a <= 5) return false }
       if (q) {
         const needle = q.toLowerCase()
-        const hay = `${e.reference} ${e.modele} ${e.salleNom} ${e.salle} ${e.type} ${e.numero_serie ?? ''} ${e.num_inventaire ?? ''}`.toLowerCase()
+        const hay = `${e.reference} ${e.modele ?? ''} ${e.salleNom} ${e.salle} ${e.type} ${e.numero_serie ?? ''} ${e.num_inventaire ?? ''}`.toLowerCase()
         if (!hay.includes(needle)) return false
       }
       return true
@@ -62,7 +63,8 @@ export function Equipements() {
       let bv: number | string
       switch (sortK) {
         case 'etat': av = RANK_ETAT[a.etat]; bv = RANK_ETAT[b.etat]; break
-        case 'annee': av = a.annee; bv = b.annee; break
+        // Fiches sans année : rejetées en fin de tri dans les deux sens.
+        case 'annee': av = a.annee ?? Infinity; bv = b.annee ?? Infinity; break
         case 'etage': av = a.etage; bv = b.etage; break
         case 'salle': av = String(a.salle); bv = String(b.salle); break
         default: av = String(a[sortK]); bv = String(b[sortK])
@@ -79,7 +81,7 @@ export function Equipements() {
     else { setSortK(k); setSortDir(1) }
   }
 
-  const age = (annee: number) => ANNEE_REF - annee
+  const age = (annee: number | null) => (annee == null ? null : ANNEE_REF - annee)
 
   return (
     <main className="main">
@@ -158,14 +160,18 @@ export function Equipements() {
                         <span className="cell-strong">{e.type}</span>
                       </div>
                     </td>
-                    <td>{e.modele}</td>
+                    <td>{e.modele ?? <span className="cell-vide">À compléter</span>}</td>
                     <td>{showNum ? `${e.salleNom} · ${e.salle}` : e.salleNom}</td>
                     <td><span className="chip">{ETAGE_COURT[e.etage]}</span></td>
                     <td>
-                      <div className="age-cell">
-                        <span className="yr">{e.annee}</span>
-                        <span className={`ag ${a > 5 ? 'old' : ''}`}>{a} an{a > 1 ? 's' : ''}</span>
-                      </div>
+                      {a == null ? (
+                        <span className="cell-vide">—</span>
+                      ) : (
+                        <div className="age-cell">
+                          <span className="yr">{e.annee}</span>
+                          <span className={`ag ${a > 5 ? 'old' : ''}`}>{a} an{a > 1 ? 's' : ''}</span>
+                        </div>
+                      )}
                     </td>
                     <td><EtatBadge etat={e.etat} /></td>
                   </tr>
@@ -206,7 +212,8 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
     initial ? salleKey(initial.etage, initial.salle) : salleKey(SALLES_TRIEES[0].etage, SALLES_TRIEES[0].num),
   )
   const [etat, setEtat] = useState<EtatKey>(initial?.etat ?? 'fonctionnel')
-  const [annee, setAnnee] = useState<number>(initial?.annee ?? ANNEE_REF)
+  // Chaîne et non nombre : le champ peut rester vide (année inconnue).
+  const [annee, setAnnee] = useState<string>(initial?.annee != null ? String(initial.annee) : '')
   const [proprietaire, setProprietaire] = useState(initial?.proprietaire ?? 'Conseil départemental')
   const [serie, setSerie] = useState(initial?.numero_serie ?? '')
   const [inventaire, setInventaire] = useState(initial?.num_inventaire ?? '')
@@ -217,13 +224,17 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
 
   async function submit(ev: FormEvent) {
     ev.preventDefault()
-    if (!modele.trim()) { setErr('Le modèle est obligatoire.'); return }
+    const an = annee.trim() === '' ? null : Number(annee)
+    if (an != null && (!Number.isInteger(an) || an < 1990 || an > ANNEE_REF + 1)) {
+      setErr(`L’année doit être comprise entre 1990 et ${ANNEE_REF + 1}, ou rester vide.`)
+      return
+    }
     setBusy(true); setErr(null)
     const [etageStr, num] = salleSel.split('|')
     const etg = Number(etageStr)
     const reference = isEdit ? initial!.reference : nextReference(type, num, equipements)
     const input = {
-      reference, type, modele: modele.trim(), annee, etat,
+      reference, type, modele: modele.trim() || null, annee: an, etat,
       salle: num, etage: etg, proprietaire: proprietaire.trim() || 'Conseil départemental',
       numero_serie: serie.trim() || null,
       num_inventaire: inventaire.trim() || null,
@@ -272,7 +283,7 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
           </label>
 
           <label className="ef-field">
-            <span>Modèle</span>
+            <span>Modèle <em>(optionnel)</em></span>
             <input
               value={modele}
               onChange={(e) => setModele(e.target.value)}
@@ -300,13 +311,14 @@ function EquipForm({ initial, onClose }: { initial: Equipement | null; onClose: 
               </select>
             </label>
             <label className="ef-field">
-              <span>Acquisition</span>
+              <span>Acquisition <em>(optionnel)</em></span>
               <input
                 type="number"
                 value={annee}
-                min={2000}
-                max={ANNEE_REF}
-                onChange={(e) => setAnnee(Number(e.target.value))}
+                min={1990}
+                max={ANNEE_REF + 1}
+                placeholder="inconnue"
+                onChange={(e) => setAnnee(e.target.value)}
               />
             </label>
           </div>

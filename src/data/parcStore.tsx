@@ -8,7 +8,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { supabase, TABLE_EQUIPEMENTS } from '../lib/supabase'
-import { SEED_EQUIPEMENTS, salleKey, salleMeta, santeFromList } from './parc'
+import { SEED_EQUIPEMENTS, nextReference, salleKey, salleMeta, santeFromList } from './parc'
 import type { Cote, Equipement, EtatKey, SanteKey } from './parc'
 import { TABLE_SIGNALEMENTS, listSignalementsActifs } from '../lib/signalements'
 import type { Signalement } from '../lib/signalements'
@@ -17,8 +17,8 @@ import type { Signalement } from '../lib/signalements'
 export interface EquipInput {
   reference: string
   type: string
-  modele: string
-  annee: number
+  modele: string | null
+  annee: number | null
   etat: EtatKey
   salle: string
   etage: number
@@ -46,6 +46,9 @@ interface ParcCtx {
   addEquip: (input: EquipInput) => Promise<void>
   updateEquip: (id: string, input: EquipInput) => Promise<void>
   removeEquip: (id: string) => Promise<void>
+  /** Relevé de terrain : ajoute un matériel d'un type donné dans une salle,
+   *  avec une référence générée. Modèle et année restent à compléter. */
+  ajouterMateriel: (type: string, etage: number, salle: string) => Promise<void>
   /** Équipements d'une salle donnée. */
   equipOf: (etage: number, num: string) => Equipement[]
   /** Santé d'une salle calculée en direct. */
@@ -129,6 +132,36 @@ export function ParcProvider({ children }: { children: ReactNode }) {
     setEquipements((prev) => prev.filter((x) => x.id !== id))
   }, [])
 
+  const ajouterMateriel = useCallback(async (type: string, etage: number, salle: string) => {
+    // La référence est unique en base. On la calcule sur l'inventaire déjà
+    // chargé (pas d'aller-retour réseau de plus, ça compte sur un téléphone)
+    // et, en cas de collision (23505), on réessaie avec le numéro suivant
+    // plutôt que d'échouer sous les doigts de l'utilisateur.
+    const refs: { reference: string }[] = equipements.map((e) => ({ reference: e.reference }))
+    for (let essai = 0; essai < 5; essai++) {
+      const input: EquipInput = {
+        reference: nextReference(type, salle, refs),
+        type,
+        modele: null,
+        annee: null,
+        etat: 'fonctionnel',
+        salle,
+        etage,
+        proprietaire: 'Conseil départemental',
+        numero_serie: null,
+        num_inventaire: null,
+        os: null,
+        notes: null,
+      }
+      const { data, error: e } = await supabase
+        .from(TABLE_EQUIPEMENTS).insert(input).select('*').single()
+      if (!e) { setEquipements((prev) => [...prev, enrich(data as Row)]); return }
+      if (e.code !== '23505') throw e
+      refs.push({ reference: input.reference })
+    }
+    throw new Error(`Impossible de générer une référence libre pour un ${type} en salle ${salle}.`)
+  }, [equipements])
+
   const bySalle = useMemo(() => {
     const m = new Map<string, Equipement[]>()
     for (const e of equipements) {
@@ -160,13 +193,14 @@ export function ParcProvider({ children }: { children: ReactNode }) {
     addEquip,
     updateEquip,
     removeEquip,
+    ajouterMateriel,
     equipOf: (etage, num) => bySalle.get(salleKey(etage, num)) ?? [],
     santeSalle: (etage, num) => santeFromList(bySalle.get(salleKey(etage, num)) ?? []),
     nbPostes: (etage, num) => (bySalle.get(salleKey(etage, num)) ?? []).length,
     signalementsActifs: signalements,
     signalementsOf: (etage, num) => signalementsBySalle.get(salleKey(etage, num)) ?? [],
     alerteSalle: (etage, num) => signalementsBySalle.has(salleKey(etage, num)),
-  }), [equipements, loading, error, load, addEquip, updateEquip, removeEquip, bySalle, signalements, signalementsBySalle])
+  }), [equipements, loading, error, load, addEquip, updateEquip, removeEquip, ajouterMateriel, bySalle, signalements, signalementsBySalle])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

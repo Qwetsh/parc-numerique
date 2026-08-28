@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { RouteProtegee } from './components/RouteProtegee'
 import { Connexion } from './pages/Connexion'
 import { Dashboard } from './pages/Dashboard'
+import { Releve } from './pages/Releve'
 import { Equipements } from './pages/Equipements'
 import { Signalements } from './pages/Signalements'
 import { Signaler } from './pages/Signaler'
@@ -45,6 +46,17 @@ export default function App() {
           {/* Page publique enseignant (QR code) — hors espace admin, sans store ni sidebar */}
           <Route path="/signaler/:equipementId" element={<Signaler />} />
           <Route path="/connexion" element={<Connexion />} />
+
+          {/* Relevé de terrain : protégé comme l'admin, mais sans la barre
+              latérale — il se fait au téléphone, en marchant dans le collège. */}
+          <Route
+            path="/releve"
+            element={
+              <RouteProtegee>
+                <ParcProvider><Releve /></ParcProvider>
+              </RouteProtegee>
+            }
+          />
 
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Dashboard />} />
