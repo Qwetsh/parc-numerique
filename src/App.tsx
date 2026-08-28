@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Outlet, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { RouteProtegee } from './components/RouteProtegee'
 import { Connexion } from './pages/Connexion'
@@ -52,6 +52,10 @@ export default function App() {
             <Route path="/signalements" element={<Signalements />} />
             <Route path="/vue-college" element={<VueCollege />} />
           </Route>
+
+          {/* Toute autre URL (ancien lien, faute de frappe) retombe sur l'accueil,
+              qui redirige vers la connexion si la session manque. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </AuthProvider>
