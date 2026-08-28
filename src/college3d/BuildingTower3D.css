@@ -93,6 +93,14 @@
 .tw-chip-dots i.ok { background: var(--ok-solid); }
 .tw-chip-dots i.warn { background: var(--warn-solid); }
 .tw-chip-dots i.bad { background: var(--bad-solid); }
+.tw-chip-dots i.alert {
+  background: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+  animation: tw-alert-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tw-alert-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+}
 
 /* overlay détail salle */
 .tw-detail {
@@ -136,6 +144,27 @@
 
 .tw-detail-tags { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .tw-detail-postes { font-size: var(--fs-sm); color: #c4d3ea; font-weight: 500; }
+.tw-detail-alert-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: var(--r-pill);
+  background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fca5a5; font-size: var(--fs-xs); font-weight: 600;
+}
+
+/* signalements de panne dans le panneau de détail */
+.tw-detail-sgs { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.tw-sg-row {
+  border: 1px solid rgba(239, 68, 68, 0.35); border-left-width: 3px;
+  border-radius: var(--r-sm); background: rgba(239, 68, 68, 0.08);
+  padding: 9px 10px;
+}
+.tw-sg-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.tw-sg-pb { font-size: var(--fs-sm); font-weight: 600; color: #fde0e0; }
+.tw-sg-ref { font-size: 10px; color: #e29c9c; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tw-sg-desc { margin: 4px 0 0; font-size: var(--fs-xs); color: #d8c4c4; line-height: 1.35; }
+.tw-sg-meta { margin-top: 5px; font-size: 11px; color: #b08a8a; }
+.tw-sg-link { font-size: var(--fs-sm); color: #fca5a5; text-decoration: none; font-weight: 500; margin-top: 2px; }
+.tw-sg-link:hover { color: #fecaca; }
 
 .tw-detail-eq { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
 .tw-eq-row {

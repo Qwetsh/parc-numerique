@@ -148,7 +148,10 @@ export function Equipements() {
                 const showNum = e.salleNom !== 'Salle ' + e.salle
                 return (
                   <tr className="clickable" key={e.id} onClick={() => setForm(e)}>
-                    <td className="cell-id">{e.reference}</td>
+                    <td className="cell-id">
+                      <span className="cell-ref">{e.reference}</span>
+                      {e.num_inventaire && <span className="cell-inv">Inv. {e.num_inventaire}</span>}
+                    </td>
                     <td>
                       <div className="type-cell">
                         <span className="type-ic"><EquipIcon type={e.type} /></span>

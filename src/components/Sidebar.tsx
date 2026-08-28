@@ -4,6 +4,7 @@ import {
   IconPalette, IconRequest, IconSoftware, IconTicket,
 } from './Icon'
 import { deconnecter, useAuth } from '../lib/auth'
+import { useParc } from '../data/parcStore'
 
 const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'active' : undefined)
 
@@ -17,6 +18,8 @@ function initiales(email: string | null): string {
 
 export function Sidebar() {
   const { email } = useAuth()
+  const { signalementsActifs } = useParc()
+  const nbSignalements = signalementsActifs.length
 
   return (
     <aside className="side">
@@ -43,6 +46,9 @@ export function Sidebar() {
         </NavLink>
         <NavLink to="/signalements" className={linkClass}>
           <IconTicket /> Signalements
+          {nbSignalements > 0 && (
+            <span className="nav-badge" title={`${nbSignalements} signalement(s) à traiter`}>{nbSignalements}</span>
+          )}
         </NavLink>
       </nav>
 

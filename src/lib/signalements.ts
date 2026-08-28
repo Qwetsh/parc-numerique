@@ -106,6 +106,17 @@ export async function listSignalements(): Promise<Signalement[]> {
   return (data ?? []) as Signalement[]
 }
 
+/** Signalements encore actifs (non résolus) — alimente les alertes visuelles
+ *  (couleur de salle, badge sidebar). */
+export async function listSignalementsActifs(): Promise<Signalement[]> {
+  const { data, error } = await supabase
+    .from(TABLE_SIGNALEMENTS).select('*')
+    .neq('statut', 'resolu')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as Signalement[]
+}
+
 /** Met à jour le statut d'un signalement (vue admin). */
 export async function setStatut(id: string, statut: Statut): Promise<void> {
   const { error } = await supabase.from(TABLE_SIGNALEMENTS).update({ statut }).eq('id', id)

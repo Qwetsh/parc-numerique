@@ -28,6 +28,10 @@ embarquée dans le bundle du site. **Tout repose donc sur les politiques RLS.**
 « Habilité » = l'adresse du compte figure dans `parc_admins`. Un compte authentifié
 absent de cette table ne voit rien : le contrôle vit en base, pas dans le front.
 
+`parc_signalements` est publiée en Realtime (alertes de salle et badge de la barre
+latérale). Realtime applique les politiques RLS : un client anonyme ne reçoit aucun
+événement.
+
 La page publique `/signaler/:id` n'accède jamais à `parc_equipements` : elle appelle
 `parc_equipement_public(uuid)`, qui ne renvoie que `reference`, `type`, `modele`,
 `salle` et `etage` — jamais `numero_serie`, `num_inventaire`, `proprietaire` ni `notes`.

@@ -74,6 +74,7 @@
 .sg-note { font-size: var(--fs-xs); color: var(--ink-500); line-height: 1.4; }
 .sg-submit { width: 100%; justify-content: center; height: 46px; font-size: var(--fs-body); margin-top: 4px; }
 .sg-err { font-size: var(--fs-sm); color: var(--bad-ink); background: var(--bad-tint); border: 1px solid var(--bad-line); border-radius: var(--r-sm); padding: 9px 12px; margin: 0; }
+.sg-warn { font-size: var(--fs-sm); color: var(--warn-ink); background: var(--warn-tint); border: 1px solid var(--warn-line); border-radius: var(--r-sm); padding: 9px 12px; margin: 12px 0 0; text-align: left; line-height: 1.4; }
 
 .sg-done { text-align: center; padding: 16px 4px 8px; }
 .sg-check {
