@@ -77,22 +77,20 @@ Deux chemins mènent au même email, **un seul doit être actif à la fois** :
 
 | Canal | Chaîne | État au 28/08/2026 |
 |---|---|---|
-| Serveur (préféré) | `insert` → `trg_notify_signalement` → `net.http_post` → edge function → EmailJS | **inactif** : `WEBHOOK_SECRET` jamais configuré, et EmailJS refuse les appels hors navigateur |
-| Navigateur (secours) | `Signaler.tsx` → `lib/notify.ts` → EmailJS | **actif** (`VITE_NOTIF_NAVIGATEUR=true`) |
+| Serveur | `insert` → `trg_notify_signalement` → `net.http_post` → edge function → EmailJS | **actif** |
+| Navigateur (secours) | `Signaler.tsx` → `lib/notify.ts` → EmailJS | inactif (`VITE_NOTIF_NAVIGATEUR=false`) |
 
-Pour basculer sur le canal serveur :
+Le canal serveur suppose trois réglages, tous faits : l'option « Allow EmailJS API for
+non-browser applications » chez EmailJS, et les secrets `WEBHOOK_SECRET` et
+`EMAILJS_PRIVATE_KEY` côté Supabase.
 
-1. EmailJS → `Account → Security` : autoriser l'API hors navigateur, puis copier
-   l'« Access Token » (clé privée).
-2. Supabase → `Edge Functions → Secrets` : créer `EMAILJS_PRIVATE_KEY` et
-   `WEBHOOK_SECRET` (voir ci-dessous).
-3. Passer `VITE_NOTIF_NAVIGATEUR` à `false` dans `.env` et redéployer, **sinon chaque
-   signalement enverra deux emails**.
+Pour repasser au canal de secours si le serveur tombe : `VITE_NOTIF_NAVIGATEUR=true` dans
+`.env` puis redéployer — et le remettre à `false` ensuite, **sinon chaque signalement
+enverra deux emails**.
 
 ## Dépannage — aucun email reçu après un signalement
 
-Si le canal serveur est actif, lire les logs de la fonction
-(`Edge Functions → notify-signalement → Logs`) :
+Lire les logs de la fonction (`Edge Functions → notify-signalement → Logs`) :
 
 | Message | Cause |
 |---|---|
