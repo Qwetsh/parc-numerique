@@ -6,8 +6,11 @@ import {
 } from '../lib/signalements'
 import type { Signalement, Statut } from '../lib/signalements'
 import type { EquipExtra } from '../lib/reparation'
-import { buildCorps, buildObjet, composeMessage, loadSettings, saveSettings } from '../lib/reparation'
-import type { ReparationSettings } from '../lib/reparation'
+import {
+  CANAUX, buildCorps, buildObjet, canalDe, canalPour, composeMessage,
+  loadSettings, mailtoUrl, saveSettings,
+} from '../lib/reparation'
+import type { CanalKey, ReparationSettings } from '../lib/reparation'
 import './Signalements.css'
 
 const STATUTS: Statut[] = ['ouvert', 'en_cours', 'resolu']
@@ -118,15 +121,19 @@ export function Signalements() {
 }
 
 /* ============================================================
-   Panneau « Préparer la demande de réparation » — message
-   précomplété à copier ; destinataire et signature mémorisés.
+   Panneau « Préparer la demande » — le canal est déduit du
+   signalement puis reste modifiable ; adresses, établissement et
+   signature sont mémorisés.
    ============================================================ */
 function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void }) {
   const [settings, setSettings] = useState<ReparationSettings>(loadSettings)
+  const [canal, setCanal] = useState<CanalKey>(() => canalPour(s.probleme, s.description))
   const [extra, setExtra] = useState<EquipExtra | null>(null)
-  const [objet, setObjet] = useState(() => buildObjet(s))
-  const [corps, setCorps] = useState(() => buildCorps(s, settings.signature))
+  const [objet, setObjet] = useState(() => buildObjet(s, canal))
+  const [corps, setCorps] = useState(() => buildCorps(s, settings, canal))
   const [copied, setCopied] = useState(false)
+
+  const adresse = settings.adresses[canal]
 
   // récupère n° de série / inventaire sur la fiche équipement pour enrichir le message
   useEffect(() => {
@@ -139,9 +146,16 @@ function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void
     return () => { alive = false }
   }, [s])
 
-  useEffect(() => { setObjet(buildObjet(s)) }, [s])
-  // régénère le corps quand le signalement, la signature ou les détails équipement changent
-  useEffect(() => { setCorps(buildCorps(s, settings.signature, extra ?? undefined)) }, [s, settings.signature, extra])
+  useEffect(() => { setCanal(canalPour(s.probleme, s.description)) }, [s])
+  useEffect(() => { setObjet(buildObjet(s, canal)) }, [s, canal])
+  // Régénère le corps quand le signalement, le canal, la signature,
+  // l'établissement ou les détails de l'équipement changent. Volontairement
+  // pas sur `settings` entier : modifier l'adresse ne doit pas écraser les
+  // retouches faites à la main dans le message.
+  const { signature, etablissement } = settings
+  useEffect(() => {
+    setCorps(buildCorps(s, { signature, etablissement }, canal, extra ?? undefined))
+  }, [s, canal, signature, etablissement, extra])
 
   function patch(p: Partial<ReparationSettings>) {
     const next = { ...settings, ...p }
@@ -149,9 +163,15 @@ function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void
     saveSettings(next)
   }
 
+  function patchAdresse(v: string) {
+    patch({ adresses: { ...settings.adresses, [canal]: v } })
+  }
+
+  const lienMail = mailtoUrl(adresse, objet, corps)
+
   async function copier() {
     try {
-      await navigator.clipboard.writeText(composeMessage(settings.destinataire, objet, corps))
+      await navigator.clipboard.writeText(composeMessage(adresse, objet, corps))
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch { /* presse-papiers indisponible (contexte non sécurisé) */ }
@@ -160,20 +180,37 @@ function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void
   return (
     <>
       <div className="dr-scrim" onClick={onClose} />
-      <aside className="dr-panel" aria-label="Préparer la demande de réparation">
+      <aside className="dr-panel" aria-label="Préparer la demande">
         <div className="dr-bar">
-          <span className="eyebrow">Demande de réparation</span>
+          <span className="eyebrow">Préparer la demande</span>
           <button className="dr-close" onClick={onClose} aria-label="Fermer">×</button>
         </div>
         <div className="dr-body">
-          <p className="dr-hint">À copier puis coller dans le Guichet Unique (Moselle Éducation), un email, ou un message au gestionnaire.</p>
+          <div className="dr-field">
+            <span>Qui prend en charge ?</span>
+            <div className="dr-canaux" role="radiogroup" aria-label="Destinataire de la demande">
+              {CANAUX.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={c.key === canal}
+                  className={`dr-canal ${c.key === canal ? 'on' : ''}`}
+                  onClick={() => setCanal(c.key)}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <p className="dr-hint">{canalDe(canal).aide}</p>
+          </div>
 
           <label className="dr-field">
-            <span>Destinataire <em>(mémorisé)</em></span>
+            <span>Adresse <em>(mémorisée pour ce destinataire)</em></span>
             <input
-              value={settings.destinataire}
-              onChange={(e) => patch({ destinataire: e.target.value })}
-              placeholder="ex. Guichet Unique / gestionnaire"
+              value={adresse}
+              onChange={(e) => patchAdresse(e.target.value)}
+              placeholder="adresse email, ou nom du destinataire"
             />
           </label>
 
@@ -187,6 +224,17 @@ function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void
             <textarea value={corps} onChange={(e) => setCorps(e.target.value)} rows={13} />
           </label>
 
+          {canal !== 'guichet' && (
+            <label className="dr-field">
+              <span>Établissement <em>(mémorisé)</em></span>
+              <input
+                value={settings.etablissement}
+                onChange={(e) => patch({ etablissement: e.target.value })}
+                placeholder="nom et RNE de l’établissement"
+              />
+            </label>
+          )}
+
           <label className="dr-field">
             <span>Signature <em>(mémorisée)</em></span>
             <textarea value={settings.signature} onChange={(e) => patch({ signature: e.target.value })} rows={2} />
@@ -195,7 +243,17 @@ function DemandeReparation({ s, onClose }: { s: Signalement; onClose: () => void
           <div className="dr-actions">
             <span className="dr-copied">{copied ? '✓ Copié dans le presse-papiers' : ''}</span>
             <button type="button" className="btn btn-ghost" onClick={onClose}>Fermer</button>
-            <button type="button" className="btn btn-primary" onClick={copier}>Copier le message</button>
+            <button type="button" className="btn btn-ghost" onClick={copier}>Copier</button>
+            {lienMail ? (
+              <a className="btn btn-primary" href={lienMail}>Ouvrir dans le mail</a>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled
+                title="Renseignez une adresse email pour ouvrir votre messagerie"
+              >Ouvrir dans le mail</button>
+            )}
           </div>
         </div>
       </aside>
