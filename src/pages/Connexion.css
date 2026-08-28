@@ -1,0 +1,58 @@
+/* Écran de connexion (lien magique) — même langage visuel que la page publique */
+.cx-wrap {
+  min-height: 100vh; width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(120% 80% at 50% 0%, #eef3fb 0%, #e7edf6 60%, #e2e9f3 100%);
+  padding: 24px 16px 48px;
+}
+.cx-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg, 18px);
+  box-shadow: var(--sh-md); padding: 24px 22px;
+}
+
+.cx-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.cx-logo {
+  width: 40px; height: 40px; border-radius: 11px; flex: none;
+  background: var(--brand-600); color: #fff; display: grid; place-items: center;
+}
+.cx-title { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -.01em; }
+.cx-sub { font-size: var(--fs-xs); color: var(--ink-500); margin-top: 1px; }
+
+.cx-intro { font-size: var(--fs-sm); color: var(--ink-600); margin: 0 0 18px; line-height: 1.5; }
+
+.cx-form { display: flex; flex-direction: column; gap: 14px; }
+.cx-field { display: flex; flex-direction: column; gap: 6px; }
+.cx-field > span { font-size: var(--fs-sm); font-weight: 550; color: var(--ink-700); }
+.cx-field input {
+  font-family: inherit; font-size: 16px; /* >=16px : pas de zoom auto iOS */
+  color: var(--ink-900); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  padding: 11px 13px; width: 100%; transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.cx-field input:focus { outline: none; border-color: var(--brand-500); box-shadow: var(--ring); }
+.cx-submit { width: 100%; justify-content: center; height: 46px; font-size: var(--fs-body); margin-top: 2px; }
+.cx-err {
+  font-size: var(--fs-sm); color: var(--bad-ink); background: var(--bad-tint);
+  border: 1px solid var(--bad-line); border-radius: var(--r-sm); padding: 9px 12px; margin: 0;
+}
+
+.cx-done { text-align: center; padding: 8px 4px 4px; }
+.cx-check {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
+  background: var(--ok-tint); color: var(--ok-ink); display: grid; place-items: center;
+  font-size: 28px; font-weight: 700;
+}
+.cx-done h2 { margin: 0 0 8px; font-size: var(--fs-h2); font-weight: 600; }
+.cx-done p { margin: 0 0 18px; color: var(--ink-600); font-size: var(--fs-sm); line-height: 1.5; }
+
+.cx-foot {
+  margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--line);
+  font-size: var(--fs-xs); color: var(--ink-500); line-height: 1.5; text-align: center;
+}
+
+/* Compte connecté mais absent de la liste blanche */
+.cx-refus { text-align: center; padding: 8px 4px 4px; }
+.cx-refus h2 { margin: 0 0 8px; font-size: var(--fs-h2); font-weight: 600; }
+.cx-refus p { margin: 0 0 18px; color: var(--ink-600); font-size: var(--fs-sm); line-height: 1.5; }
+.cx-refus .cx-mail { font-weight: 550; color: var(--ink-800, var(--ink-700)); }

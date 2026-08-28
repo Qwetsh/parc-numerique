@@ -68,7 +68,7 @@ export function buildCorps(s: Signalement, signature: string, extra?: EquipExtra
   )
   if (s.description) lignes.push(`• Détails      : ${s.description}`)
   lignes.push(
-    `• Signalé par  : ${s.enseignant_nom}, le ${date}`,
+    `• Signalé le   : ${date}`,
     '',
     'Pourriez-vous programmer une intervention ? Je reste à disposition.',
     '',

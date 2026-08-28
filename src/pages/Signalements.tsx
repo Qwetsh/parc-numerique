@@ -89,8 +89,6 @@ export function Signalements() {
                 </div>
                 {s.description && <p className="sgl-desc">{s.description}</p>}
                 <div className="sgl-meta">
-                  <span className="sgl-who">{s.enseignant_nom}</span>
-                  {s.enseignant_email && <a href={`mailto:${s.enseignant_email}`} className="sgl-mail">{s.enseignant_email}</a>}
                   <span className="sgl-date">{formatDate(s.created_at)}</span>
                 </div>
               </div>

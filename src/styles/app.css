@@ -84,6 +84,14 @@
   padding: var(--sp-3);
   border-top: 1px solid var(--line);
 }
+.side-logout {
+  margin-left: auto; flex: none;
+  font: inherit; font-size: var(--fs-xs); color: var(--ink-500);
+  background: none; border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 4px 9px; cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.side-logout:hover { color: var(--ink-800, var(--ink-700)); border-color: var(--line-strong); }
 .avatar {
   width: 34px; height: 34px; border-radius: var(--r-pill);
   background: var(--brand-100); color: var(--brand-700);

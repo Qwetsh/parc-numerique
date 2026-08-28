@@ -3,10 +3,21 @@ import {
   IconBuilding, IconDashboard, IconMemory, IconMonitor,
   IconPalette, IconRequest, IconSoftware, IconTicket,
 } from './Icon'
+import { deconnecter, useAuth } from '../lib/auth'
 
 const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'active' : undefined)
 
+/** Initiales affichées dans la pastille, à partir de l'adresse connectée. */
+function initiales(email: string | null): string {
+  const local = email?.split('@')[0] ?? ''
+  const parts = local.split(/[.\-_]/).filter(Boolean)
+  const lettres = parts.length >= 2 ? parts[0][0] + parts[1][0] : local.slice(0, 2)
+  return lettres.toUpperCase() || 'RN'
+}
+
 export function Sidebar() {
+  const { email } = useAuth()
+
   return (
     <aside className="side">
       <div className="brand">
@@ -50,13 +61,21 @@ export function Sidebar() {
       </nav>
 
       <div className="side-foot">
-        <div className="avatar">RN</div>
+        <div className="avatar">{initiales(email)}</div>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 550, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             Référent numérique
           </div>
-          <div style={{ fontSize: 11.5, color: 'var(--ink-500)' }}>Connecté</div>
+          <div
+            style={{ fontSize: 11.5, color: 'var(--ink-500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            title={email ?? undefined}
+          >
+            {email ?? 'Non connecté'}
+          </div>
         </div>
+        <button className="side-logout" onClick={() => { void deconnecter() }} title="Se déconnecter">
+          Quitter
+        </button>
       </div>
     </aside>
   )

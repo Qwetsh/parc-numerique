@@ -34,18 +34,51 @@ npm run typecheck  # vérification TypeScript seule
 | `/` | **Tableau de bord** | Indicateurs clés (total, âge moyen, % +5 ans, en panne), répartition par état, parc par étage, salles à surveiller, répartition par type. |
 | `/equipements` | **Équipements** | Table triable, recherche, filtres (type / état / étage) + filtre rapide « + de 5 ans ». |
 | `/vue-college` | **Vue du collège** | Maquette **3D Three.js** : salles teintées par santé + icône, clic = la salle s'élève et s'illumine, le reste s'estompe, panneau latéral détaillé. Sélecteur d'étage (RDC → R+3), légende, rotation à la souris. |
+| `/signalements` | **Signalements** | Pannes remontées par les enseignants, filtrables par statut, avec message de demande de réparation précomplété. |
 | `/design-system` | **Système de design** | Palette, états sémantiques, échelle typo, rayons, ombres, composants. |
+| `/signaler/:id` | **Signaler une panne** | **Page publique** ouverte par QR code, sans compte. Aucune donnée nominative n'est demandée. |
+| `/connexion` | **Connexion** | Lien magique par email pour accéder à l'espace d'administration. |
+
+Toutes les routes sauf `/signaler/:id` et `/connexion` exigent une session **et** une
+adresse inscrite dans `parc_admins`.
+
+## Accès et sécurité
+
+La clé Supabase publiable est embarquée dans le bundle : elle est publique par
+conception, et **seules les politiques RLS protègent les données**. Le détail du
+modèle d'accès, la marche à suivre pour habiliter une adresse et la configuration
+Auth à effectuer dans le dashboard sont documentés dans
+[`supabase/README.md`](supabase/README.md).
+
+Deux principes à ne pas défaire :
+
+- `parc_equipements` (qui contient les numéros de série) **n'est jamais lisible en
+  anonyme**. La page de scan passe par la fonction `parc_equipement_public(uuid)`,
+  qui ne renvoie que de quoi identifier et situer l'équipement.
+- Un signalement décrit un problème, pas une personne : **aucune donnée nominative
+  n'est collectée**, ni stockée, ni transmise à EmailJS.
+
+L'email envoyé au référent à chaque signalement peut partir de deux endroits — un seul
+canal doit être actif à la fois, voir « Notification : quel canal est actif ? » dans
+[`supabase/README.md`](supabase/README.md).
 
 ## Architecture
 
 ```
 src/
-  data/parc.ts          Données de démonstration typées (salles, équipements, helpers santé)
-  styles/               tokens.css (variables réutilisables) + app.css (shell & composants)
-  components/            Sidebar, Topbar, Badge, Wifi, icônes
-  pages/                 Dashboard, Equipements, VueCollege, DesignSystem
+  data/parc.ts           Plan du bâtiment (salles, helpers santé) + inventaire d'amorçage
+  data/parcStore.tsx     Store de l'inventaire : chargement et CRUD Supabase
+  lib/auth.tsx           Session, lien magique, habilitation (parc_admins)
+  lib/signalements.ts    Accès aux signalements + vue publique d'un équipement
+  styles/                tokens.css (variables réutilisables) + app.css (shell & composants)
+  components/            Sidebar, Topbar, Badge, Wifi, icônes, RouteProtegee
+  pages/                 Dashboard, Equipements, VueCollege, Signalements, Signaler,
+                         Connexion, DesignSystem
   college3d/             Moteur 3D : geometry (layout), Building3D (scène), Room3D, Stair3D,
                          RoomPanel, FloorSwitcher, Legend, shades (teintes par état)
+supabase/
+  migrations/            SQL appliqué au projet (RLS, fonctions)
+  functions/             Edge function notify-signalement
 ```
 
 ## Déploiement
@@ -68,9 +101,8 @@ Détails techniques (projet servi sous un sous-chemin `/parc-numerique/`) :
 
 ## Notes
 
-- Les données sont **fictives** (`src/data/parc.ts`). Le **R+1 est l'étage « réel »**
-  (salles de démo : CDI, salle informatique 210, labo, etc.) ; RDC / R+2 / R+3 sont
-  peuplés de façon variée pour illustrer le code couleur.
+- L'inventaire vit dans Supabase. `SEED_EQUIPEMENTS` (`src/data/parc.ts`) ne sert qu'à
+  amorcer une base vide ; le plan des salles, lui, reste statique.
 - La vue 3D (Three.js) est **chargée à la demande** (code splitting) : le tableau de
   bord et la liste se chargent instantanément.
 - Accessibilité : l'état n'est **jamais codé par la couleur seule** (toujours doublé
@@ -78,6 +110,7 @@ Détails techniques (projet servi sous un sous-chemin `/parc-numerique/`) :
 
 ## Prochaines étapes possibles
 
-- Brancher de vraies données (API / Supabase) en remplaçant `src/data/parc.ts`.
+- Isoler l'application dans son propre projet Supabase (région UE), aujourd'hui
+  partagé avec d'autres applications.
 - Fiche équipement au clic dans la table, export CSV réel.
 - Écrans « Bientôt » : Tickets, Logiciels, Demandes, Mémoire.

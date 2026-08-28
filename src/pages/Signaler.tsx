@@ -7,9 +7,9 @@ import type { FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { EquipIcon } from '../components/Icon'
 import { ETAGE_LABEL } from '../data/parc'
-import type { Equipement } from '../data/parc'
 import { faqFor } from '../data/faq'
-import { PROBLEMES, createSignalement, getEquipement } from '../lib/signalements'
+import { PROBLEMES, createSignalement, getEquipementPublic } from '../lib/signalements'
+import type { EquipementPublic } from '../lib/signalements'
 import { notifySignalement } from '../lib/notify'
 import { pageUrl } from '../lib/site'
 import './Signaler.css'
@@ -19,18 +19,16 @@ type Phase = 'loading' | 'ready' | 'notfound' | 'error' | 'done'
 export function Signaler() {
   const { equipementId = '' } = useParams()
   const [phase, setPhase] = useState<Phase>('loading')
-  const [equip, setEquip] = useState<Equipement | null>(null)
+  const [equip, setEquip] = useState<EquipementPublic | null>(null)
 
   const [probleme, setProbleme] = useState(PROBLEMES[0])
   const [description, setDescription] = useState('')
-  const [nom, setNom] = useState('')
-  const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => {
     let alive = true
-    getEquipement(equipementId)
+    getEquipementPublic(equipementId)
       .then((e) => { if (!alive) return; setEquip(e); setPhase(e ? 'ready' : 'notfound') })
       .catch(() => { if (alive) setPhase('error') })
     return () => { alive = false }
@@ -38,7 +36,6 @@ export function Signaler() {
 
   async function submit(ev: FormEvent) {
     ev.preventDefault()
-    if (!nom.trim()) { setErr('Merci d’indiquer votre nom.'); return }
     setBusy(true); setErr(null)
     try {
       await createSignalement({
@@ -48,18 +45,15 @@ export function Signaler() {
         etage: equip?.etage ?? null,
         probleme,
         description: description.trim(),
-        enseignant_nom: nom.trim(),
-        enseignant_email: email.trim() || null,
       })
-      // notifie le référent par email (sans bloquer ni faire échouer le signalement)
+      // Notifie le référent (canal de secours navigateur — voir lib/notify.ts).
+      // Sans bloquer ni faire échouer le signalement, déjà enregistré.
       const showNum = equip ? equip.salleNom !== `Salle ${equip.salle}` : false
       void notifySignalement({
         equipement: equip ? `${equip.type} — ${equip.modele} (${equip.reference})` : '—',
         salle: equip ? `${equip.salleNom}${showNum ? ` (${equip.salle})` : ''} · ${ETAGE_LABEL[equip.etage]}` : '—',
         probleme,
         details: description.trim() || '—',
-        enseignant: nom.trim(),
-        email: email.trim() || '—',
         date: new Date().toLocaleString('fr-FR'),
         lien: pageUrl('signalements'),
       })
@@ -96,7 +90,7 @@ export function Signaler() {
             <h2>Merci !</h2>
             <p>Votre signalement a bien été envoyé. Le référent numérique le prendra en charge.</p>
             <button className="btn btn-ghost" onClick={() => {
-              setProbleme(PROBLEMES[0]); setDescription(''); setNom(''); setEmail(''); setBusy(false); setPhase('ready')
+              setProbleme(PROBLEMES[0]); setDescription(''); setBusy(false); setPhase('ready')
             }}>Faire un autre signalement</button>
           </div>
         )}
@@ -141,18 +135,12 @@ export function Signaler() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
+                  maxLength={2000}
                   placeholder="Ex. l’écran reste noir au démarrage…"
                 />
-              </label>
-
-              <label className="sg-field">
-                <span>Votre nom</span>
-                <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom Prénom" />
-              </label>
-
-              <label className="sg-field">
-                <span>Email (optionnel)</span>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="pour être tenu informé" />
+                <small className="sg-note">
+                  Ne renseignez pas de nom d’élève ni d’information personnelle dans ce champ.
+                </small>
               </label>
 
               {err && <p className="sg-err">{err}</p>}

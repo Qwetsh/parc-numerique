@@ -2,6 +2,9 @@
    Signalements de panne (app support enseignants via QR code).
    Accès direct à Supabase, indépendant du store admin (parcStore) :
    la page publique /signaler ne charge pas tout l'inventaire.
+
+   Un signalement décrit un équipement, un lieu et une panne — jamais
+   une personne : aucune donnée nominative n'est collectée.
    ============================================================ */
 import { supabase } from './supabase'
 import { salleMeta } from '../data/parc'
@@ -35,8 +38,6 @@ export interface Signalement {
   etage: number | null
   probleme: string
   description: string
-  enseignant_nom: string
-  enseignant_email: string | null
   statut: Statut
   created_at: string
 }
@@ -48,13 +49,39 @@ export interface SignalementInput {
   etage: number | null
   probleme: string
   description: string
-  enseignant_nom: string
-  enseignant_email: string | null
 }
 
 type EquipRow = Omit<Equipement, 'salleNom' | 'cote'>
 
-/** Récupère un équipement par son id (page publique), enrichi du nom de salle. */
+/** Ce que la page publique est autorisée à connaître d'un équipement :
+ *  de quoi le reconnaître et le situer, rien de plus (ni n° de série,
+ *  ni n° d'inventaire, ni propriétaire, ni notes). */
+export interface EquipementPublic {
+  id: string
+  reference: string
+  type: string
+  modele: string
+  salle: string
+  etage: number
+  salleNom: string
+}
+
+/** Ligne renvoyée par la fonction SQL parc_equipement_public. */
+type EquipPublicRow = Omit<EquipementPublic, 'salleNom'>
+
+/** Récupère un équipement scanné depuis la page publique.
+ *  Passe par une fonction SQL restreinte : la table parc_equipements
+ *  n'est pas lisible sans être authentifié. */
+export async function getEquipementPublic(id: string): Promise<EquipementPublic | null> {
+  const { data, error } = await supabase
+    .rpc('parc_equipement_public', { p_id: id }).maybeSingle()
+  if (error) throw error
+  if (!data) return null
+  const r = data as EquipPublicRow
+  return { ...r, salleNom: salleMeta(r.etage, r.salle)?.nom ?? r.salle }
+}
+
+/** Récupère un équipement complet (vue admin, nécessite une session). */
 export async function getEquipement(id: string): Promise<Equipement | null> {
   const { data, error } = await supabase
     .from('parc_equipements').select('*').eq('id', id).maybeSingle()
