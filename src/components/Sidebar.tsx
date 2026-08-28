@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   IconBuilding, IconDashboard, IconMemory, IconMonitor,
-  IconPalette, IconRequest, IconSoftware, IconTicket,
+  IconRequest, IconSoftware, IconTicket,
 } from './Icon'
 import { deconnecter, useAuth } from '../lib/auth'
 import { useParc } from '../data/parcStore'
@@ -57,13 +57,6 @@ export function Sidebar() {
         <a className="soon"><IconSoftware /> Logiciels <span className="nav-soon-tag">Bientôt</span></a>
         <a className="soon"><IconRequest /> Demandes <span className="nav-soon-tag">Bientôt</span></a>
         <a className="soon"><IconMemory /> Mémoire <span className="nav-soon-tag">Bientôt</span></a>
-      </nav>
-
-      <div className="nav-group-label">Référence</div>
-      <nav className="nav">
-        <NavLink to="/design-system" className={linkClass}>
-          <IconPalette /> Système de design
-        </NavLink>
       </nav>
 
       <div className="side-foot">

@@ -35,7 +35,6 @@ npm run typecheck  # vérification TypeScript seule
 | `/equipements` | **Équipements** | Table triable, recherche, filtres (type / état / étage) + filtre rapide « + de 5 ans ». |
 | `/vue-college` | **Vue du collège** | Maquette **3D Three.js** : salles teintées par santé + icône, clic = la salle s'élève et s'illumine, le reste s'estompe, panneau latéral détaillé. Sélecteur d'étage (RDC → R+3), légende, rotation à la souris. |
 | `/signalements` | **Signalements** | Pannes remontées par les enseignants, filtrables par statut, avec message de demande de réparation précomplété. |
-| `/design-system` | **Système de design** | Palette, états sémantiques, échelle typo, rayons, ombres, composants. |
 | `/signaler/:id` | **Signaler une panne** | **Page publique** ouverte par QR code, sans compte. Aucune donnée nominative n'est demandée. |
 | `/connexion` | **Connexion** | Lien magique par email pour accéder à l'espace d'administration. |
 
@@ -73,7 +72,7 @@ src/
   styles/                tokens.css (variables réutilisables) + app.css (shell & composants)
   components/            Sidebar, Topbar, Badge, Wifi, icônes, RouteProtegee
   pages/                 Dashboard, Equipements, VueCollege, Signalements, Signaler,
-                         Connexion, DesignSystem
+                         Connexion
   college3d/             Moteur 3D : geometry (layout), Building3D (scène), Room3D, Stair3D,
                          RoomPanel, FloorSwitcher, Legend, shades (teintes par état)
 supabase/

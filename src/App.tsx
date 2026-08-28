@@ -10,10 +10,9 @@ import { Signaler } from './pages/Signaler'
 import { AuthProvider } from './lib/auth'
 import { ParcProvider } from './data/parcStore'
 
-// La vue 3D (Three.js) et la page design sont chargées à la demande
-// pour garder le chargement initial léger.
+// La vue 3D (Three.js) est chargée à la demande pour garder le chargement
+// initial léger.
 const VueCollege = lazy(() => import('./pages/VueCollege').then((m) => ({ default: m.VueCollege })))
-const DesignSystem = lazy(() => import('./pages/DesignSystem').then((m) => ({ default: m.DesignSystem })))
 
 // Espace admin : réservé aux comptes habilités (RouteProtegee), puis
 // Sidebar + inventaire chargé depuis Supabase (ParcProvider).
@@ -53,7 +52,6 @@ export default function App() {
             <Route path="/signalements" element={<Signalements />} />
             <Route path="/vue-college" element={<VueCollege />} />
           </Route>
-          <Route path="/design-system" element={<RouteProtegee><DesignSystem /></RouteProtegee>} />
         </Routes>
       </Suspense>
     </AuthProvider>
